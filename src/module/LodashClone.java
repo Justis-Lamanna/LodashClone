@@ -571,4 +571,65 @@ public class LodashClone {
     public static <T> List<T> fill(List<T> array, T value){
         return fill(array, value, 0, array.size());
     }
+    
+    /**
+     * Find the first item in the array that passes the predicate, and returns its index.
+     * @param <T> The type in the list.
+     * @param array The array to test.
+     * @param predicate The predicate to use to test.
+     * @param start The index to start from.
+     * @return The index of the passing value, or -1 if not found.
+     * @throws IllegalArgumentException Start is less than zero, or exceeds array size.
+     * @throws NullPointerException Array or predicate is null.
+     */
+    public static <T> int findIndex(List<T> array, Predicate<T> predicate, int start){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(predicate);
+        if(start < 0 || start >= array.size()){
+            throw new IllegalArgumentException("Start must lie in array bounds");
+        }
+        for(int index = start; index < array.size(); index++){
+            if(predicate.test(array.get(index))){
+                return index;
+            }
+        }
+        return -1;
+    }
+    
+    /**
+     * Find the first item in the array that passes the predicate, and returns its index.
+     * @param <T> The type in the list.
+     * @param array The array to test.
+     * @param predicate The predicate to use to test.
+     * @return The index of the passing value, or -1 if not found.
+     * @throws IllegalArgumentException Start is less than zero, or exceeds array size.
+     * @throws NullPointerException Array or predicate is null.
+     */
+    public static <T> int findIndex(List<T> array, Predicate<T> predicate){
+        return findIndex(array, predicate, 0);
+    }
+    
+    /**
+     * Find the first item in the array that isn't in the list of invalid values, and returns its index.
+     * @param <T> The type in the list.
+     * @param array The array to test.
+     * @param invalidValues The list of invalid values.
+     * @return The index of the passing value, or -1 if not found.
+     * @throws NullPointerException Array or invalidValues is null.
+     */
+    public static <T> int findIndex(List<T> array, List<T> invalidValues){
+        Objects.requireNonNull(invalidValues);
+        return findIndex(array, el -> !iIsInvalidValue(el, invalidValues), 0);
+    }
+    
+    /**
+     * Find the first item in the array that isn't null.
+     * @param <T> The type in the list.
+     * @param array The array to test.
+     * @return The index of the passing value, or -1 if not found.
+     * @throws NullPointerException Array is null.
+     */
+    public static <T> int findIndex(List<T> array){
+        return findIndex(array, el -> el != null, 0);
+    }
 }
