@@ -25,10 +25,10 @@ public class LodashClone {
     }
     
     public static void main(String[] args){
-        List<Integer> testList = Arrays.asList(0, 0, 2, 4, 6, 7, 8, 0);
+        List<Integer> testList = Arrays.asList(0, 2, 4, 6, 7, 8);
         List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(dropRightWhile(testList, LodashUtil.FALSEY_INTEGER));
+        System.out.println(fill(testList, 0, 11, 10));
     }
     
     /**
@@ -104,19 +104,6 @@ public class LodashClone {
     }
     
     /**
-     * Tests if a value is invalid.
-     * @param <T> The type in the list.
-     * @param value The value to check.
-     * @param invalid The invalid values.
-     * @return True if invalid, false if not.
-     */
-    static <T> boolean iIsInvalidValue(T value, T... invalid){
-        Objects.requireNonNull(value);
-        List<T> invalidList = Arrays.asList(Objects.requireNonNull(invalid));
-        return invalidList.contains(value);
-    }
-    
-    /**
      * Creates a list with all invalid values removed.
      * @param <T> The type contained in the list.
      * @param array The array to compact.
@@ -125,18 +112,6 @@ public class LodashClone {
      * @throws NullPointerException Supplied array is null.
      */
     public static <T> List<T> compact(List<T> array, List<T> invalid){
-        return iFilter(array, el -> !iIsInvalidValue(el, invalid));
-    }
-    
-    /**
-     * Creates a list with all invalid values removed.
-     * @param <T> The type contained in the list.
-     * @param array The array to compact.
-     * @param invalid A list of invalid values.
-     * @return The new array, with invalid values removed.
-     * @throws NullPointerException Supplied array is null.
-     */
-    public static <T> List<T> compact(List<T> array, T... invalid){
         return iFilter(array, el -> !iIsInvalidValue(el, invalid));
     }
     
@@ -537,5 +512,63 @@ public class LodashClone {
      */
     public static <T> List<T> dropRightWhile(List<T> array){
         return dropRightWhile(array, (value, index, list) -> value != null);
+    }
+    
+    /**
+     * Fill an array with a value.
+     * This method mutates the supplied list.
+     * @param <T> The type contained in the list.
+     * @param array The list to fill.
+     * @param value The value to fill with.
+     * @param start The index to start the fill.
+     * @param end The index to stop filling (exclusive).
+     * @return The modified array.
+     * @throws IllegalArgumentException Start is less than zero, end exceeds list length,
+     * or start is greater than end.
+     * @throws NullPointerException Provided list is null.
+     */
+    public static <T> List<T> fill(List<T> array, T value, int start, int end){
+        Objects.requireNonNull(array);
+        if(start < 0){
+            throw new IllegalArgumentException("Start must be non-negative");
+        }
+        if(end > array.size()){
+            throw new IllegalArgumentException("End must be less than or equal to list size");
+        }
+        if(start > end){
+            throw new IllegalArgumentException("Start must be less than end.");
+        }
+        for(int index = start; index < end; index++){
+            array.set(index, value);
+        }
+        return array;
+    }
+    
+    /**
+     * Fill an array with a value.
+     * This method mutates the supplied list.
+     * @param <T> The type contained in the list.
+     * @param array The list to fill.
+     * @param value The value to fill with.
+     * @param start The index to start the fill.
+     * @return The modified array.
+     * @throws IllegalArgumentException Start is less than zero, or greater than list size.
+     * @throws NullPointerException Provided list is null.
+     */
+    public static <T> List<T> fill(List<T> array, T value, int start){
+        return fill(array, value, start, array.size());
+    }
+    
+    /**
+     * Fill an array with a value.
+     * This method mutates the supplied list.
+     * @param <T> The type contained in the list.
+     * @param array The list to fill.
+     * @param value The value to fill with.
+     * @return The modified array.
+     * @throws NullPointerException Provided list is null.
+     */
+    public static <T> List<T> fill(List<T> array, T value){
+        return fill(array, value, 0, array.size());
     }
 }
