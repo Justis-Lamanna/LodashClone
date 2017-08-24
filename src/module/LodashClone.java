@@ -7,6 +7,7 @@ package module;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +28,7 @@ public class LodashClone {
         List<Integer> testList = Arrays.asList(0, 0, 2, 4, 6, 7, 8, 0);
         List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(dropWhile(testList, LodashUtil.FALSEY_INTEGER));
+        System.out.println(dropRightWhile(testList, LodashUtil.FALSEY_INTEGER));
     }
     
     /**
@@ -426,6 +427,7 @@ public class LodashClone {
     
     /**
      * Drop elements from the beginning until predicate returns true.
+     * Note that the array passed into the predicate cannot be modified, only read.
      * @param <T> The type in the list.
      * @param array The list to test.
      * @param predicate The predicate to test with.
@@ -433,7 +435,7 @@ public class LodashClone {
      * @throws NullPointerException Array or predicate is null.
      */
     public static <T> List<T> dropWhile(List<T> array, ArrayPredicate<T> predicate){
-        Objects.requireNonNull(array);
+        array = Collections.unmodifiableList(Objects.requireNonNull(array));
         Objects.requireNonNull(predicate);
         int cutoff;
         for(cutoff = 0; cutoff < array.size(); cutoff++){
@@ -470,18 +472,6 @@ public class LodashClone {
     }
     
     /**
-     * Drop elements from the beginning until a valid value is reached.
-     * @param <T> The type in the list.
-     * @param array The list to test.
-     * @param invalidValues A list of invalid values.
-     * @return A list with the elements removed from the beginning that weren't valid.
-     * @throws NullPointerException Array is null.
-     */
-    public static <T> List<T> dropWhile(List<T> array, T... invalidValues){
-        return dropWhile(array, (value, index, list) -> !iIsInvalidValue(value, invalidValues));
-    }
-    
-    /**
      * Drop elements from the beginning until a non-null value is reached.
      * @param <T> The type in the list.
      * @param array The list to test.
@@ -492,9 +482,60 @@ public class LodashClone {
         return dropWhile(array, (value, index, list) -> value != null);
     }
     
+    /**
+     * Drop elements from the end until a predicate returns true.
+     * Note that the array supplied to the predicate cannot be modified.
+     * @param <T> The type contained in the list.
+     * @param array The list to drop from.
+     * @param predicate The predicate to test against.
+     * @return A list with the elements removed from the end that didn't pass the predicate.
+     * @throws IllegalArgumentException Array or predicate is null.
+     */
     public static <T> List<T> dropRightWhile(List<T> array, ArrayPredicate<T> predicate){
-        Objects.requireNonNull(array);
+        array = Collections.unmodifiableList(Objects.requireNonNull(array));
         Objects.requireNonNull(predicate);
-        return null;
+        int cutoff;
+        for(cutoff = array.size() - 1; cutoff >= 0; cutoff--){
+            if(predicate.test(array.get(cutoff), cutoff, array)){
+                break;
+            }
+        }
+        return array.subList(0, cutoff + 1);
+    }
+    
+    /**
+     * Drop elements from the end until a predicate returns true.
+     * @param <T> The type contained in the list.
+     * @param array The list to drop from.
+     * @param predicate The predicate to test against.
+     * @return A list with the elements removed from the end that didn't pass the predicate.
+     * @throws IllegalArgumentException Array or predicate is null.
+     */
+    public static <T> List<T> dropRightWhile(List<T> array, Predicate<T> predicate){
+        Objects.requireNonNull(predicate);
+        return dropRightWhile(array, (value, index, list) -> predicate.test(value));
+    }
+    
+    /**
+     * Drop elements from the end until reaching a valid value.
+     * @param <T> The type contained in the list.
+     * @param array The list to drop from.
+     * @param invalidValues A list of invalid values.
+     * @return A list with the elements removed from the end that were invalid.
+     * @throws IllegalArgumentException Array or invalidValues is null.
+     */
+    public static <T> List<T> dropRightWhile(List<T> array, List<T> invalidValues){
+        return dropRightWhile(array, (value, index, list) -> !iIsInvalidValue(value, invalidValues));
+    }
+    
+    /**
+     * Drop elements from the end until reaching a non-null value.
+     * @param <T> The type contained in the list.
+     * @param array The list to drop from.
+     * @return A list with the elements removed from the end that were invalid.
+     * @throws IllegalArgumentException Array or invalidValues is null.
+     */
+    public static <T> List<T> dropRightWhile(List<T> array){
+        return dropRightWhile(array, (value, index, list) -> value != null);
     }
 }
