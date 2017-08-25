@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiPredicate;
@@ -25,10 +26,10 @@ public class LodashClone {
     }
     
     public static void main(String[] args){
-        List<Integer> testList = Arrays.asList(0, 2, 4, 6, 7, 8);
+        List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 4, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(lastIndexOf(testList, 6));
+        System.out.println(pull(testList, 1, 2, 3, 4));
     }
     
     /**
@@ -64,7 +65,6 @@ public class LodashClone {
      * @param <T> The type of list.
      * @param array The array to process.
      * @return The chunked list of lists.
-     * @throws IllegalArgumentException Size is non-positive.
      * @throws NullPointerException The supplied array is null.
      */
     public static <T> List<List<T>> chunk(List<T> array){
@@ -481,17 +481,17 @@ public class LodashClone {
      * @param start The index to start the fill.
      * @param end The index to stop filling (exclusive).
      * @return The modified array.
-     * @throws IllegalArgumentException Start is less than zero, end exceeds list length,
-     * or start is greater than end.
+     * @throws IllegalArgumentException Start is greater than end.
+     * @throws ArrayIndexOutOfBoundsException Start or end exceed bounds.
      * @throws NullPointerException Provided list is null.
      */
     public static <T> List<T> fill(List<T> array, T value, int start, int end){
         Objects.requireNonNull(array);
         if(start < 0){
-            throw new IllegalArgumentException("Start must be non-negative");
+            throw new ArrayIndexOutOfBoundsException("Start must be non-negative");
         }
         if(end > array.size()){
-            throw new IllegalArgumentException("End must be less than or equal to list size");
+            throw new ArrayIndexOutOfBoundsException("End must be less than or equal to list size");
         }
         if(start > end){
             throw new IllegalArgumentException("Start must be less than end.");
@@ -537,14 +537,14 @@ public class LodashClone {
      * @param predicate The predicate to use to test.
      * @param start The index to start from.
      * @return The index of the passing value, or -1 if not found.
-     * @throws IllegalArgumentException Start is less than zero, or exceeds array size.
+     * @throws ArrayIndexOutOfBoundsException Start is less than zero, or exceeds array size.
      * @throws NullPointerException Array or predicate is null.
      */
     public static <T> int findIndex(List<T> array, Predicate<T> predicate, int start){
         Objects.requireNonNull(array);
         Objects.requireNonNull(predicate);
         if(start < 0 || start >= array.size()){
-            throw new IllegalArgumentException("Start must lie in array bounds");
+            throw new ArrayIndexOutOfBoundsException("Start must lie in array bounds");
         }
         for(int index = start; index < array.size(); index++){
             if(predicate.test(array.get(index))){
@@ -560,7 +560,6 @@ public class LodashClone {
      * @param array The array to test.
      * @param predicate The predicate to use to test.
      * @return The index of the passing value, or -1 if not found.
-     * @throws IllegalArgumentException Start is less than zero, or exceeds array size.
      * @throws NullPointerException Array or predicate is null.
      */
     public static <T> int findIndex(List<T> array, Predicate<T> predicate){
@@ -585,14 +584,14 @@ public class LodashClone {
      * @param predicate The predicate to determine if the value was found.
      * @param start The index to start searching, inclusive.
      * @return The index of the last array to match the predicate, or -1 if not found.
-     * @throws IllegalArgumentException start is not within array bounds.
+     * @throws ArrayIndexOutOfBoundsException start is not within array bounds.
      * @throws NullPointerException Array or predicate is null.
      */
     public static <T> int findLastIndex(List<T> array, Predicate<T> predicate, int start){
         Objects.requireNonNull(array);
         Objects.requireNonNull(predicate);
         if(start < 0 || start >= array.size()){
-            throw new IllegalArgumentException("Start must lie in array bounds");
+            throw new ArrayIndexOutOfBoundsException("Start must lie in array bounds");
         }
         for(int index = start; index >= 0; index--){
             if(predicate.test(array.get(index))){
@@ -657,7 +656,7 @@ public class LodashClone {
      * @param start The index to begin searching. If negative, start becomes the
      * arrays size plus this value.
      * @return The index of the specified element, or -1 if not found.
-     * @throws IllegalArgumentException Start is not in bounds.
+     * @throws ArrayIndexOutOfBoundsException Start is not in bounds.
      * @throws NullPointerException Array is null.
      */
     public static <T> int indexOf(List<T> array, T value, int start){
@@ -666,7 +665,7 @@ public class LodashClone {
             start = array.size() + start;
         }
         if(start < 0 || start >= array.size()){
-            throw new IllegalArgumentException("Start is not in bounds");
+            throw new ArrayIndexOutOfBoundsException("Start is not in bounds");
         }
         for(int index = start; index < array.size(); index++){
             if(Objects.equals(value, array.get(index))){
@@ -931,7 +930,7 @@ public class LodashClone {
      * @param start The index to begin searching. If negative, start becomes the
      * arrays size plus this value.
      * @return The index of the specified element, or -1 if not found.
-     * @throws IllegalArgumentException Start is not in bounds.
+     * @throws ArrayIndexOutOfBoundsException Start is not in bounds.
      * @throws NullPointerException Array is null.
      */
     public static <T> int lastIndexOf(List<T> array, T value, int start){
@@ -940,7 +939,7 @@ public class LodashClone {
             start = array.size() + start;
         }
         if(start < 0 || start >= array.size()){
-            throw new IllegalArgumentException("Start is not in bounds");
+            throw new ArrayIndexOutOfBoundsException("Start is not in bounds");
         }
         for(int index = start; index >= 0; index--){
             if(Objects.equals(value, array.get(index))){
@@ -961,5 +960,54 @@ public class LodashClone {
      */
     public static <T> int lastIndexOf(List<T> array, T value){
         return lastIndexOf(array, value, array.size() - 1);
+    }
+    
+    /**
+     * Get the element at index n of the array.
+     * If the supplied index is negative, the nth element from the end is
+     * returned.
+     * @param <T> The type in the array.
+     * @param array The array to retrieve from.
+     * @param index The index of the element to retrieve.
+     * @return The specified element.
+     * @throws NullPointerException Array is null.
+     * @throws ArrayIndexOutOfBoundsException Index is out of bounds.
+     */
+    public static <T> T nth(List<T> array, int index){
+        Objects.requireNonNull(array);
+        if(index < 0){
+            index = array.size() + index;
+        }
+        if(index < 0 || index >= array.size()){
+            throw new ArrayIndexOutOfBoundsException("Index specified is out of bounds.");
+        }
+        return array.get(index);
+    }
+    
+    /**
+     * Removes all values specified from the list.
+     * This operation mutates the list. Use without() for non-mutation.
+     * @param <T> The type in the list.
+     * @param array The array to remove from.
+     * @param values The values to remove.
+     * @return The instance of the provided array.
+     * @throws NullPointerException array or values is null.
+     */
+    public static <T> List<T> pull(List<T> array, List<T> values){
+        Objects.requireNonNull(array).removeAll(Objects.requireNonNull(values));
+        return array;
+    }
+    
+    /**
+     * Removes all values specified from the list.
+     * This operation mutates the list. Use without() for non-mutation.
+     * @param <T> The type in the list.
+     * @param array The array to remove from.
+     * @param values The values to remove.
+     * @return The instance of the provided array.
+     * @throws NullPointerException array or values is null.
+     */
+    public static <T> List<T> pull(List<T> array, T... values){
+        return pull(array, Arrays.asList(values));
     }
 }
