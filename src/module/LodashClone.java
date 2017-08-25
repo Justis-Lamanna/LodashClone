@@ -28,7 +28,7 @@ public class LodashClone {
         List<Integer> testList = Arrays.asList(0, 2, 4, 6, 7, 8);
         List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(intersection(Arrays.asList(testList, testList2)));
+        System.out.println(join(testList, "~"));
     }
     
     /**
@@ -762,6 +762,25 @@ public class LodashClone {
     }
     
     /**
+     * Check if a list contains a value, after applying a mapping function.
+     * @param <T> The type in the list.
+     * @param list The list of values to search.
+     * @param value The value to compare equality with.
+     * @param comparator The comparing function.
+     * @return True if the list contains a value that the comparator marks as equal.
+     * @throws NullPointerException List or comparator is null.
+     */
+    static <T> boolean iContains(List<T> list, T value, BiPredicate<T, T> comparator){
+        Objects.requireNonNull(comparator);
+        for(T other : Objects.requireNonNull(list)){
+            if(comparator.test(value, other)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Creates a list containing only common values between lists.
      * An iteratee is used to convert each value before comparison
      * @param <T> The type contained in the list of lists.
@@ -803,5 +822,91 @@ public class LodashClone {
      */
     public static <T> List<T> intersectionBy(List<List<T>> arrays){
         return intersection(arrays);
+    }
+    
+    /**
+     * Creates a list containing only common values between many lists.
+     * @param <T> The type in the lists.
+     * @param arrays The arrays to check.
+     * @param comparator The function which checks for equality.
+     * @return A list of values each list contains.
+     * @throws NullPointerException The list of lists is null, one of the sublists
+     * is null, or the comparator is null.
+     */
+    public static <T> List<T> intersectionWith(List<List<T>> arrays, BiPredicate<T, T> comparator){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        Objects.requireNonNull(comparator);
+        List<T> intersection = new ArrayList<>();
+        for(T value : arrays.get(0)){
+            boolean seen = true;
+            for(int index = 1; index < arrays.size(); index++){
+                if(!iContains(arrays.get(index), value, comparator)){
+                    seen = false;
+                    break;
+                }
+            }
+            if(seen){
+                intersection.add(value);
+            }
+        }
+        return intersection;
+    }
+    
+    /**
+     * Creates a list containing only common values between many lists.
+     * @param <T> The type in the lists.
+     * @param arrays The arrays to check.
+     * @param comparator The function which checks for equality.
+     * @return A list of values each list contains.
+     * @throws NullPointerException The list of lists is null, one of the sublists
+     * is null, or the comparator is null.
+     */
+    public static <T> List<T> intersectionWith(List<List<T>> arrays, Comparator<T> comparator){
+        return intersectionWith(arrays, iBiPredicateFromComparator(comparator));
+    }
+    
+    /**
+     * Creates a list containing only common values between many lists.
+     * @param <T> The type in the lists
+     * @param arrays The arrays to check.
+     * @return A list of values each list contains.
+     * @throws NullPointerException The list of lists is null, or one of the sublists
+     * is null.
+     */
+    public static <T> List<T> intersectionWith(List<List<T>> arrays){
+        return intersection(arrays);
+    }
+    
+    /**
+     * Converts a list into a string, separated by a specific separator.
+     * @param <T> The type in the array.
+     * @param array The array to turn into a string.
+     * @param separator The separator string, used between elements.
+     * @return A string containing each element and the separator between them.
+     * @throws NullPointerException Array or separator is null.
+     */
+    public static <T> String join(List<T> array, String separator){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(separator);
+        String joined = "";
+        for(int index = 0; index < array.size(); index++){
+            if(index != 0){
+                joined += separator;
+            }
+            joined += Objects.toString(array.get(index));
+        }
+        return joined;
+    }
+    
+    /**
+     * Converts a list into a string, separated by a comma.
+     * @param <T> The type in the array.
+     * @param array The array to turn into a string.
+     * @return A string containing each element and the separator between them.
+     * @throws NullPointerException Array is null.
+     */
+    public static <T> String join(List<T> array){
+        return join(array, ",");
     }
 }
