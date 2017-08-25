@@ -28,7 +28,7 @@ public class LodashClone {
         List<Integer> testList = Arrays.asList(0, 2, 4, 6, 7, 8);
         List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(join(testList, "~"));
+        System.out.println(lastIndexOf(testList, 6));
     }
     
     /**
@@ -683,6 +683,7 @@ public class LodashClone {
      * @param value The value to search for.
      * @return The index of the specified element, or -1 if not found.
      * @throws NullPointerException Array is null.
+     * @throws IllegalArgumentException Array is empty.
      */
     public static <T> int indexOf(List<T> array, T value){
         return indexOf(array, value, 0);
@@ -908,5 +909,57 @@ public class LodashClone {
      */
     public static <T> String join(List<T> array){
         return join(array, ",");
+    }
+    
+    /**
+     * Retrieves the last element in an array.
+     * @param <T> The type in the array.
+     * @param array The array to retrieve from.
+     * @return The last element, or null if the list is empty.
+     * @throws NullPointerException array is null.
+     */
+    public static <T> T last(List<T> array){
+        Objects.requireNonNull(array);
+        return array.isEmpty() ? null : array.get(array.size() - 1);
+    }
+    
+    /**
+     * Find the index of a specified element.
+     * @param <T> The type contained in the list.
+     * @param array The array to search.
+     * @param value The value to search for.
+     * @param start The index to begin searching. If negative, start becomes the
+     * arrays size plus this value.
+     * @return The index of the specified element, or -1 if not found.
+     * @throws IllegalArgumentException Start is not in bounds.
+     * @throws NullPointerException Array is null.
+     */
+    public static <T> int lastIndexOf(List<T> array, T value, int start){
+        Objects.requireNonNull(array);
+        if(start < 0){
+            start = array.size() + start;
+        }
+        if(start < 0 || start >= array.size()){
+            throw new IllegalArgumentException("Start is not in bounds");
+        }
+        for(int index = start; index >= 0; index--){
+            if(Objects.equals(value, array.get(index))){
+                return index;
+            }
+        }
+        return -1;
+    }
+    
+    /**
+     * Find the index of a specified element.
+     * @param <T> The type contained in the list.
+     * @param array The array to search.
+     * @param value The value to search for.
+     * @return The index of the specified element, or -1 if not found.
+     * @throws NullPointerException Array is null.
+     * @throws IllegalArgumentException Array is empty.
+     */
+    public static <T> int lastIndexOf(List<T> array, T value){
+        return lastIndexOf(array, value, array.size() - 1);
     }
 }
