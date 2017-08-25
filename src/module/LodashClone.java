@@ -781,7 +781,7 @@ public class LodashClone {
             R valueMapped = iteratee.apply(value);
             boolean seen = true;
             for(int index = 1; index < arrays.size(); index++){
-                if(iContains(arrays.get(index), valueMapped, iteratee)){
+                if(!iContains(arrays.get(index), valueMapped, iteratee)){
                     seen = false;
                     break;
                 }
