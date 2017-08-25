@@ -690,4 +690,43 @@ public class LodashClone {
     public static <T> T head(List<T> array){
         return first(array);
     }
+    
+    /**
+     * Find the index of a specified element.
+     * @param <T> The type contained in the list.
+     * @param array The array to search.
+     * @param value The value to search for.
+     * @param start The index to begin searching. If negative, start becomes the
+     * arrays size plus this value.
+     * @return The index of the specified element, or -1 if not found.
+     * @throws IllegalArgumentException Start is not in bounds.
+     * @throws NullPointerException Array is null.
+     */
+    public static <T> int indexOf(List<T> array, T value, int start){
+        Objects.requireNonNull(array);
+        if(start < 0){
+            start = array.size() + start;
+        }
+        if(start < 0 || start >= array.size()){
+            throw new IllegalArgumentException("Start is not in bounds");
+        }
+        for(int index = start; index < array.size(); index++){
+            if(Objects.equals(value, array.get(index))){
+                return index;
+            }
+        }
+        return -1;
+    }
+    
+    /**
+     * Find the index of a specified element.
+     * @param <T> The type contained in the list.
+     * @param array The array to search.
+     * @param value The value to search for.
+     * @return The index of the specified element, or -1 if not found.
+     * @throws NullPointerException Array is null.
+     */
+    public static <T> int indexOf(List<T> array, T value){
+        return indexOf(array, value, 0);
+    }
 }
