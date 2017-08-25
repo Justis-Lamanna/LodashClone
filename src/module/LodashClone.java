@@ -740,6 +740,28 @@ public class LodashClone {
     }
     
     /**
+     * Check if a list contains a value, after applying a mapping function.
+     * @param <T> The type in the list.
+     * @param <R> The type returned from the iteratee.
+     * @param list The list of values to search.
+     * @param value The value to compare equality with.
+     * @param iteratee The mapping function.
+     * @return True if the list contains a value that, when applied with the
+     * iteratee, is equal to the specified value.
+     * @throws NullPointerException List or iteratee is null.
+     */
+    static <T, R> boolean iContains(List<T> list, R value, Function<T, R> iteratee){
+        Objects.requireNonNull(iteratee);
+        for(T other : Objects.requireNonNull(list)){
+            R otherMapped = iteratee.apply(other);
+            if(Objects.equals(value, otherMapped)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Creates a list containing only common values between lists.
      * An iteratee is used to convert each value before comparison
      * @param <T> The type contained in the list of lists.
@@ -756,15 +778,12 @@ public class LodashClone {
         Objects.requireNonNull(iteratee);
         List<T> intersection = new ArrayList<>();
         for(T value : arrays.get(0)){
-            R mappedValue = iteratee.apply(value);
+            R valueMapped = iteratee.apply(value);
             boolean seen = true;
             for(int index = 1; index < arrays.size(); index++){
-                for(T other : arrays.get(index)){
-                    R mappedOther = iteratee.apply(other);
-                    if(!Objects.equals(mappedValue, mappedOther)){
-                        seen = false;
-                        break;
-                    }
+                if(iContains(arrays.get(index), valueMapped, iteratee)){
+                    seen = false;
+                    break;
                 }
             }
             if(seen){
