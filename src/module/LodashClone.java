@@ -28,7 +28,7 @@ public class LodashClone {
         List<Integer> testList = Arrays.asList(0, 2, 4, 6, 7, 8);
         List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(findLastIndex(testList));
+        System.out.println(indexOf(testList, 6, 4));
     }
     
     /**
@@ -677,7 +677,7 @@ public class LodashClone {
      */
     public static <T> T first(List<T> array){
         Objects.requireNonNull(array);
-        return array.size() == 0 ? null : array.get(0);
+        return array.isEmpty() ? null : array.get(0);
     }
     
     /**
@@ -728,5 +728,19 @@ public class LodashClone {
      */
     public static <T> int indexOf(List<T> array, T value){
         return indexOf(array, value, 0);
+    }
+    
+    /**
+     * Returns a copy of the supplied array, except the last value.
+     * @param <T> The type in the array.
+     * @param array The array to slice.
+     * @return A copy of the array, with the last element removed, or an
+     * empty array if the supplied array was empty.
+     * @throws NullPointerException Array is null.
+     */
+    public static <T> List<T> initial(List<T> array){
+        return Objects.requireNonNull(array).isEmpty() ? 
+                new ArrayList<>() : 
+                array.subList(0, array.size() - 1);
     }
 }
