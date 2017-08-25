@@ -21,14 +21,14 @@ import java.util.function.Predicate;
  */
 public class LodashClone {
     private LodashClone(){
-		throw new IllegalStateException("Cannot instantiate Lodash");
+        throw new IllegalStateException("Cannot instantiate Lodash");
     }
     
     public static void main(String[] args){
         List<Integer> testList = Arrays.asList(0, 2, 4, 6, 7, 8);
         List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(fill(testList, 0, 11, 10));
+        System.out.println(findLastIndex(testList));
     }
     
     /**
@@ -610,19 +610,6 @@ public class LodashClone {
     }
     
     /**
-     * Find the first item in the array that isn't in the list of invalid values, and returns its index.
-     * @param <T> The type in the list.
-     * @param array The array to test.
-     * @param invalidValues The list of invalid values.
-     * @return The index of the passing value, or -1 if not found.
-     * @throws NullPointerException Array or invalidValues is null.
-     */
-    public static <T> int findIndex(List<T> array, List<T> invalidValues){
-        Objects.requireNonNull(invalidValues);
-        return findIndex(array, el -> !iIsInvalidValue(el, invalidValues), 0);
-    }
-    
-    /**
      * Find the first item in the array that isn't null.
      * @param <T> The type in the list.
      * @param array The array to test.
@@ -631,5 +618,52 @@ public class LodashClone {
      */
     public static <T> int findIndex(List<T> array){
         return findIndex(array, el -> el != null, 0);
+    }
+    
+    /**
+     * Find the last item in the array that matches a predicate.
+     * @param <T> The type in the array.
+     * @param array The array to search.
+     * @param predicate The predicate to determine if the value was found.
+     * @param start The index to start searching, inclusive.
+     * @return The index of the last array to match the predicate, or -1 if not found.
+     * @throws IllegalArgumentException start is not within array bounds.
+     * @throws NullPointerException Array or predicate is null.
+     */
+    public static <T> int findLastIndex(List<T> array, Predicate<T> predicate, int start){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(predicate);
+        if(start < 0 || start >= array.size()){
+            throw new IllegalArgumentException("Start must lie in array bounds");
+        }
+        for(int index = start; index >= 0; index--){
+            if(predicate.test(array.get(index))){
+                return index;
+            }
+        }
+        return -1;
+    }
+    
+    /**
+     * Find the last item in the array that matches a predicate.
+     * @param <T> The type in the array.
+     * @param array The array to search.
+     * @param predicate The predicate to determine if the value was found.
+     * @return The index of the last array to match the predicate, or -1 if not found.
+     * @throws NullPointerException Array or predicate is null.
+     */
+    public static <T> int findLastIndex(List<T> array, Predicate<T> predicate){
+        return findLastIndex(array, predicate, array.size() - 1);
+    }
+    
+    /**
+     * Find the last item in the array that is non-null.
+     * @param <T> The type in the array.
+     * @param array The array to search.
+     * @return The index of the last array to match the predicate, or -1 if not found.
+     * @throws NullPointerException Array is null.
+     */
+    public static <T> int findLastIndex(List<T> array){
+        return findLastIndex(array, el -> el != null, array.size() - 1);
     }
 }
