@@ -28,7 +28,7 @@ public class LodashClone {
         List<Integer> testList = Arrays.asList(0, 2, 4, 6, 7, 8);
         List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(intersection(testList, testList2));
+        System.out.println(intersection(Arrays.asList(testList, testList2)));
     }
     
     /**
@@ -165,19 +165,6 @@ public class LodashClone {
     }
     
     /**
-     * Creates a list of values in array that are not in values.
-     * @param <T> The type of each list.
-     * @param array The beginning list.
-     * @param values Lists of values that should be removed from array.
-     * @return A copy of array, with values removed.
-     * @throws NullPointerException Either list is null, or values contains null.
-     */
-    public static <T> List<T> difference(List<T> array, List<T>... values){
-        Objects.requireNonNull(values);
-        return difference(array, Arrays.asList(values));
-    }
-    
-    /**
      * Maps a list in some way.
      * @param <T> The type of the values in the input list.
      * @param <R> The type of the values in the output list.
@@ -232,21 +219,6 @@ public class LodashClone {
             }
             return true;
         });
-    }
-    
-    /**
-     * Returns the array, with specified values removed, after going through an iterator.
-     * @param <T> The type contained in the lists.
-     * @param <R> The type to be mapped into during comparison.
-     * @param array The initial array.
-     * @param iteratee The iteratee function, which dictates the comparison.
-     * @param values A list of lists of values to exclude.
-     * @return The list, with values removed.
-     * @throws NullPointerException The array, iteratee, values, or any sublist is null.
-     */
-    public static <T, R> List<T> differenceBy(List<T> array, Function<T, R> iteratee, List<T>... values){
-        Objects.requireNonNull(values);
-        return differenceBy(array, iteratee, Arrays.asList(values));
     }
     
     /**
@@ -312,20 +284,6 @@ public class LodashClone {
     public static <T> List<T> differenceWith(List<T> array, Comparator<T> comparator, List<List<T>> values){
         Objects.requireNonNull(comparator);
         return differenceWith(array, iBiPredicateFromComparator(comparator), values);
-    }
-    
-    /**
-     * Returns the array, with specified values removed, depending on a BiPredicate.
-     * @param <T> The type in the first list.
-     * @param array The inital array.
-     * @param comparator The Comparator to use to make comparisons.
-     * @param values The values to remove from the first array.
-     * @return The first list, with values removed.
-     * @throws NullPointerException array, comparator, values, or any sublist of values is null.
-     */
-    public static <T> List<T> differenceWith(List<T> array, Comparator<T> comparator, List<T>... values){
-        Objects.requireNonNull(values);
-        return differenceWith(array, iBiPredicateFromComparator(comparator), Arrays.asList(values));
     }
     
     /**
@@ -782,6 +740,41 @@ public class LodashClone {
     }
     
     /**
+     * Creates a list containing only common values between lists.
+     * An iteratee is used to convert each value before comparison
+     * @param <T> The type contained in the list of lists.
+     * @param <R> The type converted to during comparison.
+     * @param arrays The list of arrays to check.
+     * @param iteratee An iteratee function that converts each value into another.
+     * @return A list of values each list contains.
+     * @throws NullPointerException The list of lists is null, or one of the sublists
+     * is null, or the iteratee is null.
+     */
+    public static <T, R> List<T> intersectionBy(List<List<T>> arrays, Function<T, R> iteratee){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        Objects.requireNonNull(iteratee);
+        List<T> intersection = new ArrayList<>();
+        for(T value : arrays.get(0)){
+            R mappedValue = iteratee.apply(value);
+            boolean seen = true;
+            for(int index = 1; index < arrays.size(); index++){
+                for(T other : arrays.get(index)){
+                    R mappedOther = iteratee.apply(other);
+                    if(!Objects.equals(mappedValue, mappedOther)){
+                        seen = false;
+                        break;
+                    }
+                }
+            }
+            if(seen){
+                intersection.add(value);
+            }
+        }
+        return intersection;
+    }
+    
+    /**
      * Creates a list containing only common values between many lists.
      * @param <T> The type in the lists
      * @param arrays The arrays to check.
@@ -789,8 +782,7 @@ public class LodashClone {
      * @throws NullPointerException The list of lists is null, or one of the sublists
      * is null.
      */
-    public static <T> List<T> intersection(List<T>... arrays){
-        Objects.requireNonNull(arrays);
-        return intersection(Arrays.asList(arrays));
+    public static <T> List<T> intersectionBy(List<List<T>> arrays){
+        return intersection(arrays);
     }
 }
