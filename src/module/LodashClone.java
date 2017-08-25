@@ -666,4 +666,28 @@ public class LodashClone {
     public static <T> int findLastIndex(List<T> array){
         return findLastIndex(array, el -> el != null, array.size() - 1);
     }
+    
+    /**
+     * Get the first element of an array.
+     * Alias for head()
+     * @param <T> The type in the list.
+     * @param array The array to retrieve from, or null if the list is empty.
+     * @return The first element in the list.
+     * @throws NullPointerException Array is null.
+     */
+    public static <T> T first(List<T> array){
+        Objects.requireNonNull(array);
+        return array.size() == 0 ? null : array.get(0);
+    }
+    
+    /**
+     * Get the first element of an array.
+     * @param <T> The type in the list.
+     * @param array The array to retrieve from, or null if the list is empty.
+     * @return The first element in the list.
+     * @throws NullPointerException Array is null.
+     */
+    public static <T> T head(List<T> array){
+        return first(array);
+    }
 }
