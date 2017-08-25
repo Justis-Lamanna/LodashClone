@@ -28,7 +28,7 @@ public class LodashClone {
         List<Integer> testList = Arrays.asList(0, 2, 4, 6, 7, 8);
         List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(indexOf(testList, 6, 4));
+        System.out.println(intersection(testList, testList2));
     }
     
     /**
@@ -742,5 +742,55 @@ public class LodashClone {
         return Objects.requireNonNull(array).isEmpty() ? 
                 new ArrayList<>() : 
                 array.subList(0, array.size() - 1);
+    }
+    
+    static <T> List<T> iFlatten(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        List<T> flattened = new ArrayList<>();
+        for(List<T> array : arrays){
+            flattened.addAll(array);
+        }
+        return flattened;
+    }
+    
+    /**
+     * Creates a list containing only common values between many lists.
+     * @param <T> The type in the lists
+     * @param arrays The arrays to check.
+     * @return A list of values each list contains.
+     * @throws NullPointerException The list of lists is null, or one of the sublists
+     * is null.
+     */
+    public static <T> List<T> intersection(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        List<T> intersection = new ArrayList<>();
+        for(T value : arrays.get(0)){
+            boolean seen = true;
+            for(int index = 1; index < arrays.size(); index++){
+                if(!arrays.get(index).contains(value)){
+                    seen = false;
+                    break;
+                }
+            }
+            if(seen){
+                intersection.add(value);
+            }
+        }
+        return intersection;
+    }
+    
+    /**
+     * Creates a list containing only common values between many lists.
+     * @param <T> The type in the lists
+     * @param arrays The arrays to check.
+     * @return A list of values each list contains.
+     * @throws NullPointerException The list of lists is null, or one of the sublists
+     * is null.
+     */
+    public static <T> List<T> intersection(List<T>... arrays){
+        Objects.requireNonNull(arrays);
+        return intersection(Arrays.asList(arrays));
     }
 }
