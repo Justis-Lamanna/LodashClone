@@ -30,7 +30,7 @@ public class LodashClone {
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 4);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
         //testList.add(sortedIndex(testList, 5), 5);
-        System.out.println(sortedUniq(testList));
+        System.out.println(takeRight(testList, 1));
     }
     
     /**
@@ -1513,5 +1513,51 @@ public class LodashClone {
             }
         }
         return uniqueValues;
+    }
+    
+    /**
+     * Get all but the first element of an array.
+     * @param <T> The type in the list.
+     * @param array The array to get the tail of.
+     * @return The list, minus the first element.
+     */
+    public static <T> List<T> tail(List<T> array){
+        return Objects.requireNonNull(array).subList(1, array.size());
+    }
+    
+    /**
+     * Retrieve the first n elements from a list.
+     * @param <T> The type of the list.
+     * @param array The array to take from.
+     * @param amount The number of first elements to take.
+     * @return The first amount elements.
+     */
+    public static <T> List<T> take(List<T> array, int amount){
+        Objects.requireNonNull(array);
+        if(amount < 0){
+            throw new IllegalArgumentException("Amount must be non-negative");
+        }
+        if(amount > array.size()){
+            amount = array.size();
+        }
+        return array.subList(0, amount);
+    }
+    
+    /**
+     * Retrieve the last n elements from a list.
+     * @param <T> The type of the list.
+     * @param array The array to take from.
+     * @param amount The number of last elements to take.
+     * @return The last amount elements.
+     */
+    public static <T> List<T> takeRight(List<T> array, int amount){
+        Objects.requireNonNull(array);
+        if(amount < 0){
+            throw new IllegalArgumentException("Amount must be non-negative");
+        }
+        if(amount > array.size()){
+            amount = array.size();
+        }
+        return array.subList(array.size() - amount, array.size());
     }
 }
