@@ -993,7 +993,7 @@ public class LodashClone {
      * @return The instance of the provided array.
      * @throws NullPointerException array or values is null.
      */
-    public static <T> List<T> pull(List<T> array, List<T> values){
+    public static <T> List<T> pullAll(List<T> array, List<T> values){
         Objects.requireNonNull(array).removeAll(Objects.requireNonNull(values));
         return array;
     }
@@ -1008,6 +1008,104 @@ public class LodashClone {
      * @throws NullPointerException array or values is null.
      */
     public static <T> List<T> pull(List<T> array, T... values){
-        return pull(array, Arrays.asList(values));
+        return pullAll(array, Arrays.asList(values));
+    }
+    
+    /**
+     * Removes values from a list, after mapping each with an iteratee.
+     * This mutates the list. Use differenceBy() for a non-mutating version.
+     * @param <T> The type in each list.
+     * @param <R> The type mapped to when passing through the iteratee.
+     * @param array The starting array.
+     * @param values The values to pull.
+     * @param iteratee The mapping function applied before comparison.
+     * @return The modified list.
+     * @throws NullPointerException Array, values, or iteratee is null.
+     */
+    public static <T, R> List<T> pullAllBy(List<T> array, List<T> values, Function<T, R> iteratee){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(values);
+        Objects.requireNonNull(iteratee);
+        Iterator<T> iterator = array.iterator();
+        while(iterator.hasNext()){
+            T value = iterator.next();
+            R mappedValue = iteratee.apply(value);
+            for(T other : values){
+                R mappedOther = iteratee.apply(other);
+                if(Objects.equals(mappedValue, mappedOther)){
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
+        return array;
+    }
+    
+    /**
+     * Removes values from a list, without specifying a mapping function
+     * This mutates the list. Use differenceBy() for a non-mutating version.
+     * @param <T> The type in each list.
+     * @param array The starting array.
+     * @param values The values to pull.
+     * @return The modified list.
+     * @throws NullPointerException Array or values is null.
+     */
+    public static <T> List<T> pullAllBy(List<T> array, List<T> values){
+        return pullAll(array, values);
+    }
+    
+    /**
+     * Remove values from a list, using a BiPredicate for checking equality.
+     * This mutates the list. Use differenceWith() for a non-mutating version.
+     * @param <T> The type in the list.
+     * @param array The array to pull from.
+     * @param values The values to pull.
+     * @param comparator The BiPredicate that determines equality.
+     * @return The modified array.
+     * @throws NullPointerException Array, values, or comparator is null.
+     */
+    public static <T> List<T> pullAllWith(List<T> array, List<T> values, BiPredicate<T, T> comparator){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(values);
+        Objects.requireNonNull(comparator);
+        Iterator<T> iterator = array.iterator();
+        while(iterator.hasNext()){
+            T value = iterator.next();
+            for(T other : values){
+                if(comparator.test(other, value)){
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
+        return array;
+    }
+    
+    /**
+     * Remove values from a list, using a Comparator for checking equality.
+     * This mutates the list. Use differenceWith() for a non-mutating version.
+     * @param <T> The type in the list.
+     * @param array The array to pull from.
+     * @param values The values to pull.
+     * @param comparator The BiPredicate that determines equality.
+     * @return The modified array.
+     * @throws NullPointerException Array, values, or comparator is null.
+     */
+    public static <T> List<T> pullAllWith(List<T> array, List<T> values, Comparator<T> comparator){
+        Objects.requireNonNull(comparator);
+        return pullAllWith(array, values, iBiPredicateFromComparator(comparator));
+    }
+    
+    /**
+     * Removes all values specified from the list.
+     * This operation mutates the list. Use without() for non-mutation.
+     * @param <T> The type in the list.
+     * @param array The array to remove from.
+     * @param values The values to remove.
+     * @return The instance of the provided array.
+     * @throws NullPointerException array or values is null.
+     */
+    public static <T> List<T> pullAllWith(List<T> array, List<T> values){
+        return pullAll(array, values);
     }
 }
