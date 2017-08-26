@@ -26,11 +26,20 @@ public class LodashClone {
     }
     
     public static void main(String[] args){
-        List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, 6, 7, 8));
+        List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, null, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 4);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
         //testList.add(sortedIndex(testList, 5), 5);
-        System.out.println(takeRight(testList, 1));
+        System.out.println(takeWhile(testList));
+    }
+    
+    /**
+     * An identity predicate, which returns true if item is non-null.
+     * @param <T>
+     * @return 
+     */
+    static <T> Predicate<T> iIdentityPredicate(){
+        return i -> i != null;
     }
     
     /**
@@ -199,12 +208,12 @@ public class LodashClone {
      * @param <T> The type contained in the lists.
      * @param <R> The type to be mapped into during comparison.
      * @param array The initial array.
-     * @param iteratee The iteratee function, which dictates the comparison.
      * @param values A list of lists of values to exclude.
+     * @param iteratee The iteratee function, which dictates the comparison.
      * @return The list, with values removed.
      * @throws NullPointerException The array, iteratee, values, or any sublist is null.
      */
-    public static <T, R> List<T> differenceBy(List<T> array, Function<T, R> iteratee, List<List<T>> values){
+    public static <T, R> List<T> differenceBy(List<T> array, List<List<T>> values, Function<T, R> iteratee){
         Objects.requireNonNull(values);
         values.forEach(Objects::requireNonNull);
         Objects.requireNonNull(iteratee);
@@ -360,12 +369,12 @@ public class LodashClone {
     }
     
     /**
-     * Drop elements from the beginning until predicate returns true.
+     * Drop elements from the beginning until predicate returns false.
      * Note that the array passed into the predicate cannot be modified, only read.
      * @param <T> The type in the list.
      * @param array The list to test.
      * @param predicate The predicate to test with.
-     * @return A list with the elements removed from the beginning that didn't pass the predicate.
+     * @return A list with the elements removed from the beginning that passed the predicate.
      * @throws NullPointerException Array or predicate is null.
      */
     public static <T> List<T> dropWhile(List<T> array, ArrayPredicate<T> predicate){
@@ -373,7 +382,7 @@ public class LodashClone {
         Objects.requireNonNull(predicate);
         int cutoff;
         for(cutoff = 0; cutoff < array.size(); cutoff++){
-            if(predicate.test(array.get(cutoff), cutoff, array)){
+            if(!predicate.test(array.get(cutoff), cutoff, array)){
                 break;
             }
         }
@@ -381,11 +390,11 @@ public class LodashClone {
     }
     
     /**
-     * Drop elements from the beginning until predicate returns true.
+     * Drop elements from the beginning until predicate returns false.
      * @param <T> The type in the list.
      * @param array The list to test.
      * @param predicate The predicate to test with.
-     * @return A list with the elements removed from the beginning that didn't pass the predicate.
+     * @return A list with the elements removed from the beginning that passed the predicate.
      * @throws NullPointerException Array or predicate is null.
      */
     public static <T> List<T> dropWhile(List<T> array, Predicate<T> predicate){
@@ -394,35 +403,23 @@ public class LodashClone {
     }
     
     /**
-     * Drop elements from the beginning until a valid value is reached.
+     * Drop elements from the beginning until a null value is reached.
      * @param <T> The type in the list.
      * @param array The list to test.
-     * @param invalidValues A list of invalid values.
-     * @return A list with the elements removed from the beginning that weren't valid.
-     * @throws NullPointerException Array is null.
-     */
-    public static <T> List<T> dropWhile(List<T> array, List<T> invalidValues){
-        return dropWhile(array, (value, index, list) -> !iIsInvalidValue(value, invalidValues));
-    }
-    
-    /**
-     * Drop elements from the beginning until a non-null value is reached.
-     * @param <T> The type in the list.
-     * @param array The list to test.
-     * @return A list with the elements removed from the beginning that weren't valid.
+     * @return A list with the elements removed from the beginning that weren't null.
      * @throws NullPointerException Array is null.
      */
     public static <T> List<T> dropWhile(List<T> array){
-        return dropWhile(array, (value, index, list) -> value != null);
+        return dropWhile(array, iIdentityPredicate());
     }
     
     /**
-     * Drop elements from the end until a predicate returns true.
+     * Drop elements from the end until a predicate returns false.
      * Note that the array supplied to the predicate cannot be modified.
      * @param <T> The type contained in the list.
      * @param array The list to drop from.
      * @param predicate The predicate to test against.
-     * @return A list with the elements removed from the end that didn't pass the predicate.
+     * @return A list with the elements removed from the end that passed the predicate.
      * @throws IllegalArgumentException Array or predicate is null.
      */
     public static <T> List<T> dropRightWhile(List<T> array, ArrayPredicate<T> predicate){
@@ -430,7 +427,7 @@ public class LodashClone {
         Objects.requireNonNull(predicate);
         int cutoff;
         for(cutoff = array.size() - 1; cutoff >= 0; cutoff--){
-            if(predicate.test(array.get(cutoff), cutoff, array)){
+            if(!predicate.test(array.get(cutoff), cutoff, array)){
                 break;
             }
         }
@@ -438,11 +435,11 @@ public class LodashClone {
     }
     
     /**
-     * Drop elements from the end until a predicate returns true.
+     * Drop elements from the end until a predicate returns false.
      * @param <T> The type contained in the list.
      * @param array The list to drop from.
      * @param predicate The predicate to test against.
-     * @return A list with the elements removed from the end that didn't pass the predicate.
+     * @return A list with the elements removed from the end that passed the predicate.
      * @throws IllegalArgumentException Array or predicate is null.
      */
     public static <T> List<T> dropRightWhile(List<T> array, Predicate<T> predicate){
@@ -451,26 +448,14 @@ public class LodashClone {
     }
     
     /**
-     * Drop elements from the end until reaching a valid value.
+     * Drop elements from the end until reaching a null value.
      * @param <T> The type contained in the list.
      * @param array The list to drop from.
-     * @param invalidValues A list of invalid values.
-     * @return A list with the elements removed from the end that were invalid.
-     * @throws IllegalArgumentException Array or invalidValues is null.
-     */
-    public static <T> List<T> dropRightWhile(List<T> array, List<T> invalidValues){
-        return dropRightWhile(array, (value, index, list) -> !iIsInvalidValue(value, invalidValues));
-    }
-    
-    /**
-     * Drop elements from the end until reaching a non-null value.
-     * @param <T> The type contained in the list.
-     * @param array The list to drop from.
-     * @return A list with the elements removed from the end that were invalid.
+     * @return A list with the elements removed from the end that were non-null.
      * @throws IllegalArgumentException Array or invalidValues is null.
      */
     public static <T> List<T> dropRightWhile(List<T> array){
-        return dropRightWhile(array, (value, index, list) -> value != null);
+        return dropRightWhile(array, iIdentityPredicate());
     }
     
     /**
@@ -575,7 +560,7 @@ public class LodashClone {
      * @throws NullPointerException Array is null.
      */
     public static <T> int findIndex(List<T> array){
-        return findIndex(array, el -> el != null, 0);
+        return findIndex(array, iIdentityPredicate(), 0);
     }
     
     /**
@@ -622,7 +607,7 @@ public class LodashClone {
      * @throws NullPointerException Array is null.
      */
     public static <T> int findLastIndex(List<T> array){
-        return findLastIndex(array, el -> el != null, array.size() - 1);
+        return findLastIndex(array, iIdentityPredicate(), array.size() - 1);
     }
     
     /**
@@ -822,7 +807,7 @@ public class LodashClone {
      * is null.
      */
     public static <T> List<T> intersectionBy(List<List<T>> arrays){
-        return intersection(arrays);
+        return intersectionBy(arrays, iIdentity());
     }
     
     /**
@@ -1052,7 +1037,7 @@ public class LodashClone {
      * @throws NullPointerException Array or values is null.
      */
     public static <T> List<T> pullAllBy(List<T> array, List<T> values){
-        return pullAll(array, values);
+        return pullAllBy(array, values, iIdentity());
     }
     
     /**
@@ -1199,7 +1184,7 @@ public class LodashClone {
     }
     
     /**
-     * Remove elements from an array that are null.
+     * Remove elements from an array that are non-null.
      * This operation mutates the list. Use filter() for non-mutation.
      * @param <T> The type in the array.
      * @param array The array to remove from.
@@ -1207,7 +1192,7 @@ public class LodashClone {
      * @throws NullPointerException Array.
      */
     public static <T> List<T> remove(List<T> array){
-        return remove(array, (v, i, a) -> v == null);
+        return remove(array, iIdentityPredicate());
     }
     
     /**
@@ -1336,6 +1321,31 @@ public class LodashClone {
     }
     
     /**
+     * Uses a binary search to determine the lowest index to place a value in a sorted list
+     * @param <T> The type in the list.
+     * @param array The array to search.
+     * @param value The value to insert.
+     * @param comparator The comparator function.
+     * @return The index to insert the specified value.
+     * @throws NullPointerException Array or comparable are null.
+     */
+    public static <T> int sortedIndexBy(List<T> array, T value, Comparator<T> comparator){
+        return sortedIndexBy(array, value, iIdentity(), comparator);
+    }
+    
+    /**
+     * Uses a binary search to determine the lowest index to place a value in a sorted list
+     * @param <T> The type in the list.
+     * @param array The array to search.
+     * @param value The value to insert.
+     * @return The index to insert the specified value.
+     * @throws NullPointerException Array or comparable are null.
+     */
+    public static <T extends Comparable> int sortedIndexBy(List<T> array, T value){
+        return sortedIndexBy(array, value, iIdentity(), Comparator.naturalOrder());
+    }
+    
+    /**
      * Uses a binary search to determine the first index of a value in a sorted list.
      * @param <T> The type in the list.
      * @param array The array to search.
@@ -1442,6 +1452,31 @@ public class LodashClone {
     }
     
     /**
+     * Uses a binary search to determine the highest index to place a value in a sorted list
+     * @param <T> The type in the list.
+     * @param array The array to search.
+     * @param value The value to insert.
+     * @param comparator The comparator function.
+     * @return The index to insert the specified value.
+     * @throws NullPointerException Array or comparable are null.
+     */
+    public static <T> int sortedLastIndexBy(List<T> array, T value, Comparator<T> comparator){
+        return sortedLastIndexBy(array, value, iIdentity(), comparator);
+    }
+    
+    /**
+     * Uses a binary search to determine the highest index to place a value in a sorted list
+     * @param <T> The type in the list.
+     * @param array The array to search.
+     * @param value The value to insert.
+     * @return The index to insert the specified value.
+     * @throws NullPointerException Array or comparable are null.
+     */
+    public static <T extends Comparable> int sortedLastIndexBy(List<T> array, T value){
+        return sortedLastIndexBy(array, value, iIdentity(), Comparator.naturalOrder());
+    }
+    
+    /**
      * Uses a binary search to determine the last index of a value in a sorted list.
      * @param <T> The type in the list.
      * @param array The array to search.
@@ -1544,6 +1579,16 @@ public class LodashClone {
     }
     
     /**
+     * Retrieve the first element in a list.
+     * @param <T> The type in the list.
+     * @param array The array to take from.
+     * @return A list containing the first element.
+     */
+    public static <T> List<T> take(List<T> array){
+        return take(array, 1);
+    }
+    
+    /**
      * Retrieve the last n elements from a list.
      * @param <T> The type of the list.
      * @param array The array to take from.
@@ -1559,5 +1604,97 @@ public class LodashClone {
             amount = array.size();
         }
         return array.subList(array.size() - amount, array.size());
+    }
+    
+    /**
+     * Retrieve the last element from the list.
+     * @param <T> The type in the array.
+     * @param array The array to take from.
+     * @return A list containing the last element in the array.
+     */
+    public static <T> List<T> takeRight(List<T> array){
+        return takeRight(array, 1);
+    }
+    
+    /**
+     * Retrieves elements from the beginning of a list until a predicate returns false.
+     * @param <T> The type in the array.
+     * @param array The array to take from.
+     * @param predicate The predicate to test against.
+     * @return The array, with first elements removed until the predicate returned false.
+     */
+    public static <T> List<T> takeWhile(List<T> array, ArrayPredicate<T> predicate){
+        List<T> immutableArray = Collections.unmodifiableList(Objects.requireNonNull(array));
+        Objects.requireNonNull(predicate);
+        int start;
+        for(start = 0; start < array.size(); start++){
+            if(!predicate.test(array.get(start), start, immutableArray)){
+                break;
+            }
+        }
+        return array.subList(0, start);
+    }
+    
+    /**
+     * Retrieves elements from the beginning of a list until a predicate returns false.
+     * @param <T> The type in the array.
+     * @param array The array to take from.
+     * @param predicate The predicate to test against.
+     * @return The array, with first elements removed until the predicate returned false.
+     */
+    public static <T> List<T> takeWhile(List<T> array, Predicate<T> predicate){
+        Objects.requireNonNull(predicate);
+        return takeWhile(array, (v, i, a) -> predicate.test(v));
+    }
+    
+    /**
+     * Retrieves elements from the beginning of the list until one returns null
+     * @param <T> The type in the list.
+     * @param array The array to take from
+     * @return The beginning elements, until one returns null.
+     */
+    public static <T> List<T> takeWhile(List<T> array){
+        return takeWhile(array, iIdentityPredicate());
+    }
+    
+    /**
+     * Retrieves elements from the end of the list until a predicate returns false. 
+     * @param <T> The type in the list.
+     * @param array The array to take from.
+     * @param predicate The predicate to test against.
+     * @return The elements from the end of the list that tested true.
+     */
+    public static <T> List<T> takeRightWhile(List<T> array, ArrayPredicate<T> predicate){
+        Objects.requireNonNull(predicate);
+        List<T> immutableArray = Collections.unmodifiableList(Objects.requireNonNull(array));
+        int start;
+        for(start = array.size() - 1; start >= 0; start--){
+            if(!predicate.test(array.get(start), start, immutableArray)){
+                break;
+            }
+        }
+        return array.subList(start + 1, array.size());
+    }
+    
+    /**
+     * Retrieves elements from the end of the list until a predicate returns false. 
+     * @param <T> The type in the list.
+     * @param array The array to take from.
+     * @param predicate The predicate to test against.
+     * @return The elements from the end of the list that tested true.
+     */
+    public static <T> List<T> takeRightWhile(List<T> array, Predicate<T> predicate){
+        Objects.requireNonNull(predicate);
+        return takeRightWhile(array, (v, i, a) -> predicate.test(v));
+    }
+    
+    /**
+     * Retrieves elements from the end of the list until one returns null. 
+     * @param <T> The type in the list.
+     * @param array The array to take from.
+     * @return The elements from the end of the list that tested true.
+     */
+    public static <T> List<T> takeRightWhile(List<T> array){
+        return takeRightWhile(array, iIdentityPredicate());
     }
 }
