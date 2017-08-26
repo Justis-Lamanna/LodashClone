@@ -29,7 +29,8 @@ public class LodashClone {
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 4, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(pull(testList, 1, 2, 3, 4));
+        System.out.println(remove(testList, i -> i % 2 != 0));
+        System.out.println(testList);
     }
     
     /**
@@ -1098,7 +1099,7 @@ public class LodashClone {
     
     /**
      * Removes all values specified from the list.
-     * This operation mutates the list. Use without() for non-mutation.
+     * This operation mutates the list. Use differenceWith() for non-mutation.
      * @param <T> The type in the list.
      * @param array The array to remove from.
      * @param values The values to remove.
@@ -1107,5 +1108,105 @@ public class LodashClone {
      */
     public static <T> List<T> pullAllWith(List<T> array, List<T> values){
         return pullAll(array, values);
+    }
+    
+    /**
+     * Removes the elements at the specified indexes.
+     * This operation mutates the list. Use at() for non-mutation.
+     * @param <T> The type contained in the list.
+     * @param array The list to pull from.
+     * @param indexes The indexes to pull.
+     * @return An array of pulled elements.
+     * @throws NullPointerException array is null, indexes, or a value in indexes is null
+     * @throws ArrayIndexOutOfBoundsException An index is not in the array bounds.
+     */
+    public static <T> List<T> pullAt(List<T> array, List<Integer> indexes){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(indexes);
+        for(Integer i : indexes){
+            if(Objects.requireNonNull(i) < 0 || i >= array.size()){
+                throw new ArrayIndexOutOfBoundsException("Index exceeds array bounds.");
+            }
+        }
+        List<T> pulled = new ArrayList<>();
+        List<Integer> copy = new ArrayList<>(indexes);
+        Collections.sort(copy);
+        for(int i = copy.size() - 1; i >= 0; i--){
+            int indexToRemove = copy.get(i);
+            pulled.add(0, array.remove(indexToRemove));
+        }
+        return pulled;
+    }
+    
+    /**
+     * Removes the elements at the specified indexes.
+     * This operation mutates the list. Use at() for non-mutation.
+     * @param <T> The type contained in the list.
+     * @param array The list to pull from.
+     * @param index The index to pull.
+     * @return An array containing the pulled element.
+     * @throws NullPointerException array is null.
+     * @throws ArrayIndexOutOfBoundsException index is out of bounds.
+     */
+    public static <T> List<T> pullAt(List<T> array, int index){
+        Objects.requireNonNull(array);
+        if(index < 0 || index >= array.size()){
+            throw new ArrayIndexOutOfBoundsException("Index exceeds bounds");
+        }
+        List<T> removed = new ArrayList<>();
+        removed.add(array.remove(index));
+        return removed;
+    }
+    
+    /**
+     * Remove elements from an array that pass an ArrayPredicate.
+     * This operation mutates the list. Use filter() for non-mutation.
+     * @param <T> The type in the array.
+     * @param array The array to remove from.
+     * @param predicate The predicate to determine removal.
+     * @return The removed elements.
+     * @throws NullPointerException Array or predicate is null.
+     */
+    public static <T> List<T> remove(List<T> array, ArrayPredicate<T> predicate){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(predicate);
+        int index = 0;
+        List<T> immutableArray = Collections.unmodifiableList(array);
+        List<T> removed = new ArrayList<>();
+        Iterator<T> iterator = array.iterator();
+        while(iterator.hasNext()){
+            T value = iterator.next();
+            if(predicate.test(value, index++, immutableArray)){
+                removed.add(value);
+                iterator.remove();
+            }
+        }
+        return removed;
+    }
+    
+    /**
+     * Remove elements from an array that pass a Predicate.
+     * This operation mutates the list. Use filter() for non-mutation.
+     * @param <T> The type in the array.
+     * @param array The array to remove from.
+     * @param predicate The predicate to determine removal.
+     * @return The removed elements.
+     * @throws NullPointerException Array or predicate is null.
+     */
+    public static <T> List<T> remove(List<T> array, Predicate<T> predicate){
+        Objects.requireNonNull(predicate);
+        return remove(array, (v, i, a) -> predicate.test(v));
+    }
+    
+    /**
+     * Remove elements from an array that are null.
+     * This operation mutates the list. Use filter() for non-mutation.
+     * @param <T> The type in the array.
+     * @param array The array to remove from.
+     * @return The removed elements (nulls).
+     * @throws NullPointerException Array.
+     */
+    public static <T> List<T> remove(List<T> array){
+        return remove(array, (v, i, a) -> v == null);
     }
 }
