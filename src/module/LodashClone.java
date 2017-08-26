@@ -26,11 +26,11 @@ public class LodashClone {
     }
     
     public static void main(String[] args){
-        List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 4, 6, 7, 8));
+        List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 4);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
         //testList.add(sortedIndex(testList, 5), 5);
-        System.out.println(sortedLastIndexOf(testList2, 4));
+        System.out.println(sortedUniq(testList));
     }
     
     /**
@@ -1474,5 +1474,44 @@ public class LodashClone {
      */
     public static <T extends Comparable> int sortedLastIndexOf(List<T> array, T value){
         return sortedLastIndexOf(array, value, Comparator.naturalOrder());
+    }
+    
+    /**
+     * Determines the unique values in a sorted list.
+     * @param <T> The type contained in the list.
+     * @param array The list to condense.
+     * @return The list of unique values in the array.
+     */
+    public static <T> List<T> sortedUniq(List<T> array){
+        return sortedUniqBy(array, i -> i);
+    }
+    
+    /**
+     * Determines the unique values in a sorted list through a mapping function.
+     * @param <T> The type contained in the list.
+     * @param <R> The type output by the mapping function.
+     * @param array The list to condense.
+     * @param iteratee A mapping function applied before comparing
+     * @return The list of unique values in the array.
+     */
+    public static <T, R> List<T> sortedUniqBy(List<T> array, Function<T, R> iteratee){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(iteratee);
+        List<T> uniqueValues = new ArrayList<>();
+        if(!array.isEmpty()){
+            T currentValue = array.get(0);
+            R currentValueMapped = iteratee.apply(currentValue);
+            uniqueValues.add(currentValue);
+            for(int index = 1; index < array.size(); index++){
+                T value = array.get(index);
+                R valueMapped = iteratee.apply(value);
+                if(!Objects.equals(currentValueMapped, valueMapped)){
+                    uniqueValues.add(value);
+                    currentValue = value;
+                    currentValueMapped = valueMapped;
+                }
+            }
+        }
+        return uniqueValues;
     }
 }
