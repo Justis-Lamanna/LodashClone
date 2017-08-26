@@ -30,7 +30,7 @@ public class LodashClone {
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
         //testList.add(sortedIndex(testList, 5), 5);
-        System.out.println(union(Arrays.asList(testList, testList2)));
+        System.out.println(uniq(testList));
     }
     
     /**
@@ -1777,5 +1777,77 @@ public class LodashClone {
         Objects.requireNonNull(arrays);
         arrays.forEach(i -> Objects.requireNonNull(i));
         return iUnion(arrays, iIdentity(), Objects::equals);
+    }
+    
+    /**
+     * Creates an array of unique values from a given array.
+     * @param <T> The type in the list.
+     * @param array The array to get unique values from.
+     * @return The unique values of the array.
+     */
+    public static <T> List<T> uniq(List<T> array){
+        Objects.requireNonNull(array);
+        return iUnion(Arrays.asList(array), iIdentity(), Objects::equals);
+    }
+    
+    /**
+     * Creates an array of unique values from a given array, after passing through a mapper.
+     * @param <T> The type in the list.
+     * @param array The array to get unique values from.
+     * @param iteratee The mapping function called before comparison.
+     * @return The unique values of the array.
+     */
+    public static <T, R> List<T> uniqBy(List<T> array, Function<T, R> iteratee){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(iteratee);
+        return iUnion(Arrays.asList(array), iteratee, Objects::equals);
+    }
+    
+    /**
+     * Creates an array of unique values from a given array.
+     * @param <T> The type in the list.
+     * @param array The array to get unique values from.
+     * @return The unique values of the array.
+     */
+    public static <T> List<T> uniqBy(List<T> array){
+        Objects.requireNonNull(array);
+        return iUnion(Arrays.asList(array), iIdentity(), Objects::equals);
+    }
+    
+    /**
+     * Creates an array of unique values from a given array, using a BiPredicate to test equality.
+     * @param <T> The type in the array.
+     * @param array The array to get unique values from.
+     * @param comparator The BiPredicate used to check equality
+     * @return The unique values of the array.
+     */
+    public static <T> List<T> uniqWith(List<T> array, BiPredicate<T, T> comparator){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(comparator);
+        return iUnion(Arrays.asList(array), iIdentity(), comparator);
+    }
+    
+    /**
+     * Creates an array of unique values from a given array, using a Comparator to test equality.
+     * @param <T> The type in the array.
+     * @param array The array to get unique values from.
+     * @param comparator The BiPredicate used to check equality
+     * @return The unique values of the array.
+     */
+    public static <T> List<T> uniqWith(List<T> array, Comparator<T> comparator){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(comparator);
+        return iUnion(Arrays.asList(array), iIdentity(), iBiPredicateFromComparator(comparator));
+    }
+    
+    /**
+     * Creates an array of unique values from a given array.
+     * @param <T> The type in the array.
+     * @param array The array to get unique values from.
+     * @return The unique values of the array.
+     */
+    public static <T> List<T> uniqWith(List<T> array){
+        Objects.requireNonNull(array);
+        return iUnion(Arrays.asList(array), iIdentity(), Objects::equals);
     }
 }
