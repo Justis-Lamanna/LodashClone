@@ -29,8 +29,7 @@ public class LodashClone {
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 4, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(remove(testList, i -> i % 2 != 0));
-        System.out.println(testList);
+        System.out.println(reverse(testList));
     }
     
     /**
@@ -1208,5 +1207,40 @@ public class LodashClone {
      */
     public static <T> List<T> remove(List<T> array){
         return remove(array, (v, i, a) -> v == null);
+    }
+    
+    /**
+     * Reverse the order of a list.
+     * This operation mutates the list.
+     * @param <T> The type in the list.
+     * @param array The array to reverse.
+     * @return The array, reversed.
+     */
+    public static <T> List<T> reverse(List<T> array){
+        //No sense reinventing the wheel.
+        Collections.reverse(Objects.requireNonNull(array));
+        return array;
+    }
+    
+    /**
+     * Create a slice of the list.
+     * @param <T> The type in the array.
+     * @param array The array to slice.
+     * @param start The starting index.
+     * @param end The ending index (exclusive).
+     * @return The slice of the array.
+     * @throws NullPointerException array is null.
+     * @throws ArrayIndexOutOfBoundsException Start or end is out of bounds.
+     * @throws IllegalArgumentException Start is greater than end.
+     */
+    public static <T> List<T> slice(List<T> array, int start, int end){
+        Objects.requireNonNull(array);
+        if(start < 0 || end >= array.size()){
+            throw new ArrayIndexOutOfBoundsException("Indexes are not in bounds.");
+        }
+        if(start > end){
+            throw new IllegalArgumentException("Start is greater than end.");
+        }
+        return array.subList(start, end);
     }
 }
