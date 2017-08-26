@@ -27,9 +27,10 @@ public class LodashClone {
     
     public static void main(String[] args){
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 4, 6, 7, 8));
-        List<Integer> testList2 = Arrays.asList(3, 5, 7, 9);
+        List<Integer> testList2 = Arrays.asList(4, 4, 4, 4);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        System.out.println(reverse(testList));
+        //testList.add(sortedIndex(testList, 5), 5);
+        System.out.println(sortedIndexOf(testList, 4));
     }
     
     /**
@@ -1242,5 +1243,130 @@ public class LodashClone {
             throw new IllegalArgumentException("Start is greater than end.");
         }
         return array.subList(start, end);
+    }
+    
+    static <T, R> int iBinarySearch(List<T> array, T value, Function<T, R> mapper, Comparator<R> comparator){
+        int start = 0;
+        int end = array.size() - 1;
+        R valueMapped = mapper.apply(value);
+        while(start <= end){
+            int mid = (start + end) / 2;
+            R midValueMapped = mapper.apply(array.get(mid));
+            int result = Objects.compare(midValueMapped, valueMapped, comparator);
+            if(result < 0){
+                start = mid + 1;
+            } else if(result > 0){
+                end = mid - 1;
+            } else {
+                return mid;
+            }
+        }
+        return start;
+    }
+    
+    /**
+     * Uses a binary search to determine the lowest index to place a value in a sorted list.
+     * @param <T> The type in the list.
+     * @param array The array to search.
+     * @param value The value to insert.
+     * @param comparator A comparator function.
+     * @return The first index to place the value at.
+     */
+    public static <T> int sortedIndex(List<T> array, T value, Comparator<T> comparator){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(comparator);
+        int foundIndex = iBinarySearch(array, value, t -> t, comparator);
+        T foundValue = array.get(foundIndex);
+        for(int index = foundIndex; index >= 0; index--){
+            if(!Objects.equals(foundValue, array.get(index))){
+                return index + 1;
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Uses a binary search to determine the lowest index to place a value in a sorted list.
+     * @param <T> The type in the list.
+     * @param array The array to search.
+     * @param value The value to insert.
+     * @return The first index to place the value at.
+     */
+    public static <T extends Comparable> int sortedIndex(List<T> array, T value){
+        return sortedIndex(array, value, Comparator.naturalOrder());
+    }
+    
+    /**
+     * Uses a binary search to determine the lowest index to place a value in a sorted list
+     * @param <T> The type in the list.
+     * @param <R> The type converted to by the iteratee.
+     * @param array The array to search.
+     * @param value The value to insert.
+     * @param iteratee The function used to transform each object before comparing.
+     * @param comparator The comparator function.
+     * @return The index to insert the specified value.
+     * @throws NullPointerException Array, iteratee, or comparable are null.
+     */
+    public static <T, R> int sortedIndexBy(List<T> array, T value, Function<T, R> iteratee, Comparator<R> comparator){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(iteratee);
+        Objects.requireNonNull(comparator);
+        int foundIndex = iBinarySearch(array, value, iteratee, comparator);
+        R foundValueMapped = iteratee.apply(array.get(foundIndex));
+        for(int index = foundIndex; index >= 0; index--){
+            if(!Objects.equals(foundValueMapped, iteratee.apply(array.get(index)))){
+                return index + 1;
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Uses a binary search to determine the lowest index to place a value in a sorted list
+     * @param <T> The type in the list.
+     * @param <R> The type converted to by the iteratee.
+     * @param array The array to search.
+     * @param value The value to insert.
+     * @param iteratee The function used to transform each object before comparing.
+     * @return The index to insert the specified value.
+     * @throws NullPointerException Array, iteratee, or comparable are null.
+     */
+    public static <T, R extends Comparable> int sortedIndexBy(List<T> array, T value, Function<T, R> iteratee){
+        return sortedIndexBy(array, value, iteratee, Comparator.naturalOrder());
+    }
+    
+    /**
+     * Uses a binary search to determine the first index of a value in a sorted list.
+     * @param <T> The type in the list.
+     * @param array The array to search.
+     * @param value The value to search for.
+     * @param comparator The comparator to use during comparisons.
+     * @return The index of the value, or -1 if not found.
+     */
+    public static <T> int sortedIndexOf(List<T> array, T value, Comparator<T> comparator){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(comparator);
+        int foundIndex = iBinarySearch(array, value, t -> t, comparator);
+        T foundValue = array.get(foundIndex);
+        if(!Objects.equals(foundValue, value)){
+            return -1;
+        }
+        for(int index = foundIndex; index >= 0; index--){
+            if(!Objects.equals(array.get(index), value)){
+                return index + 1;
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Uses a binary search to determine the first index of a value in a sorted list.
+     * @param <T> The type in the list.
+     * @param array The array to search.
+     * @param value The value to search for.
+     * @return The index of the value, or -1 if not found.
+     */
+    public static <T extends Comparable> int sortedIndexOf(List<T> array, T value){
+        return sortedIndexOf(array, value, Comparator.naturalOrder());
     }
 }
