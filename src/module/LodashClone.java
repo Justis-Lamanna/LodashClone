@@ -27,10 +27,10 @@ public class LodashClone {
     
     public static void main(String[] args){
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, null, 6, 7, 8));
-        List<Integer> testList2 = Arrays.asList(4, 4, 4, 4);
+        List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
         BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
         //testList.add(sortedIndex(testList, 5), 5);
-        System.out.println(takeWhile(testList));
+        System.out.println(union(Arrays.asList(testList, testList2)));
     }
     
     /**
@@ -736,30 +736,12 @@ public class LodashClone {
      * iteratee, is equal to the specified value.
      * @throws NullPointerException List or iteratee is null.
      */
-    static <T, R> boolean iContains(List<T> list, R value, Function<T, R> iteratee){
+    static <T, R> boolean iContains(List<T> list, T value, Function<T, R> iteratee, BiPredicate<R, R> comparator){
         Objects.requireNonNull(iteratee);
+        R valueMapped = iteratee.apply(value);
         for(T other : Objects.requireNonNull(list)){
             R otherMapped = iteratee.apply(other);
-            if(Objects.equals(value, otherMapped)){
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Check if a list contains a value, after applying a mapping function.
-     * @param <T> The type in the list.
-     * @param list The list of values to search.
-     * @param value The value to compare equality with.
-     * @param comparator The comparing function.
-     * @return True if the list contains a value that the comparator marks as equal.
-     * @throws NullPointerException List or comparator is null.
-     */
-    static <T> boolean iContains(List<T> list, T value, BiPredicate<T, T> comparator){
-        Objects.requireNonNull(comparator);
-        for(T other : Objects.requireNonNull(list)){
-            if(comparator.test(value, other)){
+            if(comparator.test(valueMapped, otherMapped)){
                 return true;
             }
         }
@@ -783,10 +765,9 @@ public class LodashClone {
         Objects.requireNonNull(iteratee);
         List<T> intersection = new ArrayList<>();
         for(T value : arrays.get(0)){
-            R valueMapped = iteratee.apply(value);
             boolean seen = true;
             for(int index = 1; index < arrays.size(); index++){
-                if(!iContains(arrays.get(index), valueMapped, iteratee)){
+                if(!iContains(arrays.get(index), value, iteratee, (u, v) -> Objects.equals(u, v))){
                     seen = false;
                     break;
                 }
@@ -827,7 +808,7 @@ public class LodashClone {
         for(T value : arrays.get(0)){
             boolean seen = true;
             for(int index = 1; index < arrays.size(); index++){
-                if(!iContains(arrays.get(index), value, comparator)){
+                if(!iContains(arrays.get(index), value, iIdentity(), comparator)){
                     seen = false;
                     break;
                 }
@@ -1696,5 +1677,105 @@ public class LodashClone {
      */
     public static <T> List<T> takeRightWhile(List<T> array){
         return takeRightWhile(array, iIdentityPredicate());
+    }
+    
+    /**
+     * Internal function to perform a union.
+     * @param <T> The type in the array.
+     * @param <R> The type the mapper should convert to.
+     * @param arrays The arrays to union.
+     * @param mapper The mapping function called before comparison.
+     * @param predicate The predicate used to determine equality.
+     * @return The unionized list.
+     */
+    static <T, R> List<T> iUnion(List<List<T>> arrays, Function<T, R> mapper, BiPredicate<R, R> predicate){
+        List<T> union = new ArrayList<>();
+        for(List<T> array : arrays){
+            for(T item : array){
+                if(!iContains(union, item, mapper, predicate)){
+                    union.add(item);
+                }
+            }
+        }
+        return union;
+    }
+    
+    /**
+     * Creates an array of unique values from the given arrays.
+     * @param <T> The type in the lists
+     * @param arrays The list of lists to unionize.
+     * @return A unionized list.
+     */
+    public static <T> List<T> union(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        return iUnion(arrays, iIdentity(), Objects::equals);
+    }
+    
+    /**
+     * Creates an array of unique values from the given arrays, after passing through a mapper.
+     * @param <T> The type in the lists.
+     * @param <R> The type converted to before comparison.
+     * @param arrays The array of lists to unionize.
+     * @param iteratee The mapping function.
+     * @return A unionized list.
+     */
+    public static <T, R> List<T> unionBy(List<List<T>> arrays, Function<T, R> iteratee){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        Objects.requireNonNull(iteratee);
+        return iUnion(arrays, iteratee, Objects::equals);
+    }
+    
+    /**
+     * Creates an array of unique values from the given arrays.
+     * @param <T> The type in the lists.
+     * @param arrays The array of lists to unionize.
+     * @return A unionized list.
+     */
+    public static <T> List<T> unionBy(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        return iUnion(arrays, iIdentity(), Objects::equals);
+    }
+    
+    /**
+     * Creates an array of unique values from the given arrays, using a BiPredicate to determine equality.
+     * @param <T> The type in the arrays.
+     * @param arrays The array of arrays to unionize.
+     * @param comparator The function used to determine equality.
+     * @return A unionized list.
+     */
+    public static <T> List<T> unionWith(List<List<T>> arrays, BiPredicate<T, T> comparator){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        Objects.requireNonNull(comparator);
+        return iUnion(arrays, iIdentity(), comparator);
+    }
+    
+    /**
+     * Creates an array of unique values from the given arrays, using a Comparator to determine equality.
+     * @param <T> The type in the arrays.
+     * @param arrays The array of arrays to unionize.
+     * @param comparator The function used to determine equality.
+     * @return A unionized list.
+     */
+    public static <T> List<T> unionWith(List<List<T>> arrays, Comparator<T> comparator){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        Objects.requireNonNull(comparator);
+        return iUnion(arrays, iIdentity(), iBiPredicateFromComparator(comparator));
+    }
+    
+    /**
+     * Creates an array of unique values from the given arrays.
+     * @param <T> The type in the arrays.
+     * @param arrays The array of arrays to unionize.
+     * @return A unionized list.
+     */
+    public static <T> List<T> unionWith(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        return iUnion(arrays, iIdentity(), Objects::equals);
     }
 }
