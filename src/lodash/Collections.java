@@ -28,31 +28,6 @@ public class Collections {
     }
     
     /**
-     * Internal function to get a list of indexes from a list.
-     * @param <T> The type in the list.
-     * @param list The list to get the indexes of.
-     * @return The list of indexes.
-     */
-    static <T> List<Integer> iGetIdsFromList(List<T> list){
-        List<Integer> indices = new ArrayList<>();
-        for(int index = 0; index < list.size(); index++){
-            indices.add(index);
-        }
-        return indices;
-    }
-    
-    /**
-     * Internal function to turn a Predicate into a MapPredicate
-     * @param <K> The type of the key.
-     * @param <V> The type of the value.
-     * @param predicate The predicate to wrap.
-     * @return The Predicate as a MapPredicate.
-     */
-    static <K, V> MapPredicate<K, V> iMapPredicateFromPredicate(Predicate<V> predicate){
-        return (v, i, c) -> predicate.test(v);
-    }
-    
-    /**
      * Internal function to perform countBy
      * @param <V> The type of the value.
      * @param <R> The type the value is converted to before counting.
@@ -105,33 +80,6 @@ public class Collections {
     }
     
     /**
-     * Creates an object, composed of values and the number of times they occurred.
-     * The key becomes the value, and the value is the number of times it
-     * occurs.
-     * @param <T> The type in the array.
-     * @param collection The collection to count.
-     * @return A list of mapped values and the number of times they occurred.
-     */
-    public static <T> Map<T, Integer> countBy(List<T> collection){
-        Objects.requireNonNull(collection);
-        return iCountBy(collection, Common.iIdentity());
-    }
-    
-    /**
-     * Creates an object, composed of values and the number of times they occurred.
-     * The key becomes the value, and the value is the number of times it
-     * occurs.
-     * @param <K> The key's type in the map.
-     * @param <V> The value's type in the map.
-     * @param collection The collection to count.
-     * @return A list of mapped values and the number of times they occurred.
-     */
-    public static <K, V> Map<V, Integer> countBy(Map<K, V> collection){
-        Objects.requireNonNull(collection);
-        return iCountBy(collection.values(), Common.iIdentity());
-    }
-    
-    /**
      * Internal function for every.
      * @param <V> The type of the values.
      * @param <I> The type of the identifiers (indexes/keys).
@@ -162,7 +110,7 @@ public class Collections {
         Objects.requireNonNull(collection);
         Objects.requireNonNull(predicate);
         List<T> immutableCollection = java.util.Collections.unmodifiableList(collection);
-        return iEvery(immutableCollection, iGetIdsFromList(collection), collection::get, predicate);
+        return iEvery(immutableCollection, Common.iGetIdsFromList(collection), collection::get, predicate);
     }
     
     /**
@@ -202,28 +150,7 @@ public class Collections {
      */
     public static <K, V> boolean every(Map<K, V> collection, Predicate<V> predicate){
         Objects.requireNonNull(predicate);
-        return every(collection, iMapPredicateFromPredicate(predicate));
-    }
-    
-    /**
-     * Check if a predicate is non-null for all members of a collection.
-     * @param <T> The type in the collection.
-     * @param collection The collection to check.
-     * @return True if each member of the collection is non-null.
-     */
-    public static <T> boolean every(List<T> collection){
-        return every(collection, Common.iIdentityArrayPredicate());
-    }
-    
-    /**
-     * Check if a predicate is non-null for all members of a collection.
-     * @param <K> The type of the keys in the collection.
-     * @param <V> The type of the values in the collection.
-     * @param collection The collection to check.
-     * @return True if each member of the collection is non-null.
-     */
-    public static <K, V> boolean every(Map<K, V> collection){
-        return every(collection, Common.iIdentityMapPredicate());
+        return every(collection, Common.iMapPredicateFromPredicate(predicate));
     }
     
     /**
@@ -289,28 +216,7 @@ public class Collections {
      */
     public static <K, V> Map<K, V> filter(Map<K, V> collection, Predicate<V> predicate){
         Objects.requireNonNull(predicate);
-        return filter(collection, iMapPredicateFromPredicate(predicate));
-    }
-    
-    /**
-     * Create a list of all values from a collection that are non-null.
-     * @param <T> The type in the collection.
-     * @param collection The collection to filter.
-     * @return The list of all elements from collection that are non-null.
-     */
-    public static <T> List<T> filter(List<T> collection){
-        return filter(collection, Common.iIdentityArrayPredicate());
-    }
-    
-    /**
-     * Create a list of all values from a collection that are non-null.
-     * @param <K> The type of the keys in the collection.
-     * @param <V> The type of the values in the collection.
-     * @param collection The collection to filter.
-     * @return The list of all elements from collection that are non-null.
-     */
-    public static <K, V> Map<K, V> filter(Map<K, V> collection){
-        return filter(collection, Common.iIdentityMapPredicate());
+        return filter(collection, Common.iMapPredicateFromPredicate(predicate));
     }
     
     /**
@@ -432,30 +338,7 @@ public class Collections {
      */
     public static <K, V> K find(Map<K, V> collection, Predicate<V> predicate){
         Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(Objects.requireNonNull(collection));
-        MapPredicate<K, V> mapPredicate = iMapPredicateFromPredicate(Objects.requireNonNull(predicate));
+        MapPredicate<K, V> mapPredicate = Common.iMapPredicateFromPredicate(Objects.requireNonNull(predicate));
         return iFind(immutableCollection, mapPredicate);
-    }
-    
-    /**
-     * Find the first non-null value.
-     * @param <T> The type in the list.
-     * @param collection The collection to search.
-     * @return The found item, or null if none was found.
-     */
-    public static <T> T find(List<T> collection){
-        List<T> immutableCollection = java.util.Collections.unmodifiableList(Objects.requireNonNull(collection));
-        return iFind(immutableCollection, Common.iIdentityArrayPredicate(), 0, true);
-    }
-    
-    /**
-     * Find a key with a non-null value.
-     * @param <K> The type of keys in the collection.
-     * @param <V> The type of values in the collection.
-     * @param collection The collection to search.
-     * @return The found item, or null if none was found.
-     */
-    public static <K, V> K find(Map<K, V> collection){
-        Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(Objects.requireNonNull(collection));
-        return iFind(immutableCollection, Common.iIdentityMapPredicate());
     }
 }

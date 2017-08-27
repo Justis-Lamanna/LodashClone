@@ -100,4 +100,13 @@ public class LodashUtil {
      * A predicate that returns true if the supplied string is truthy.
      */
     public static final Predicate<String> VALID_STRINGS = isNotInList(FALSEY_STRINGS);
+    
+    /**
+     * A predicate that returns true if the supplied object is non-null.
+     * @param <T> The type checking.
+     * @return A predicate that returns true if the tested object is non-null.
+     */
+    public static <T> Predicate<T> validObjects(){
+        return t -> t != null;
+    }
 }

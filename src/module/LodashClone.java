@@ -23,6 +23,6 @@ public class LodashClone {
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, null, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
         List<List<Integer>> testList3 = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(1, 4));
-        System.out.println(Collections.every(testList2));
+        System.out.println(Collections.every(testList, LodashUtil.validObjects()));
     }
 }

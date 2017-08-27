@@ -162,25 +162,6 @@ public class Arrays {
     }
     
     /**
-     * Maps a list in some way.
-     * @param <T> The type of the values in the input list.
-     * @param <R> The type of the values in the output list.
-     * @param array The array to map.
-     * @param iteratee The mapping function.
-     * @return The mapped list.
-     * @throws NullPointerException Supplied array or iteratee is null.
-     */
-    private static <T, R> List<R> iMap(List<T> array, Function<T, R> iteratee){
-        Objects.requireNonNull(array);
-        Objects.requireNonNull(iteratee);
-        ArrayList<R> copy = new ArrayList<>();
-        for(T value : array){
-            copy.add(iteratee.apply(value));
-        }
-        return copy;
-    }
-    
-    /**
      * Returns the array, with specified values removed, after going through an iterator.
      * @param <T> The type contained in the lists.
      * @param <R> The type to be mapped into during comparison.
@@ -218,7 +199,7 @@ public class Arrays {
      * @return The first list, with values removed.
      * @throws NullPointerException array, bipred, values, or any sublist of values is null.
      */
-    public static <T, R> List<T> differenceWith(List<T> array, BiPredicate<T, R> bipred, List<List<R>> values){
+    public static <T, R> List<T> differenceWith(List<T> array, List<List<R>> values, BiPredicate<T, R> bipred){
         Objects.requireNonNull(bipred);
         Objects.requireNonNull(values);
         values.forEach(Objects::requireNonNull);
@@ -237,49 +218,15 @@ public class Arrays {
     /**
      * Returns the array, with specified values removed, depending on a BiPredicate.
      * @param <T> The type in the first list.
-     * @param <R> The type in the list of lists.
-     * @param array The inital array.
-     * @param bipred The BiPredicate to use to make comparisons.
-     * @param values The values to remove from the first array.
-     * @return The first list, with values removed.
-     * @throws NullPointerException array, bipred, values, or any sublist of values is null.
-     */
-    public static <T, R> List<T> differenceWith(List<T> array, BiPredicate<T, R> bipred, List<R>... values){
-        Objects.requireNonNull(values);
-        return differenceWith(array, bipred, java.util.Arrays.asList(values));
-    }
-    
-    /**
-     * Creates a BiPredicate from a comparator.
-     * @param <T> The type the comparator compares with.
-     * @param comparator The comparator to convert.
-     * @return A BiPredicate which works as the comparator did.
-     */
-    static <T> BiPredicate<T, T> iBiPredicateFromComparator(Comparator<T> comparator){
-        return (T t, T u) -> comparator.compare(t, u) == 0;
-    }
-    
-    /**
-     * Returns the array, with specified values removed, depending on a BiPredicate.
-     * @param <T> The type in the first list.
      * @param array The inital array.
      * @param comparator The Comparator to use to make comparisons.
      * @param values The values to remove from the first array.
      * @return The first list, with values removed.
      * @throws NullPointerException array, comparator, values, or any sublist of values is null.
      */
-    public static <T> List<T> differenceWith(List<T> array, Comparator<T> comparator, List<List<T>> values){
+    public static <T> List<T> differenceWith(List<T> array, List<List<T>> values, Comparator<T> comparator){
         Objects.requireNonNull(comparator);
-        return differenceWith(array, iBiPredicateFromComparator(comparator), values);
-    }
-    
-    /**
-     * Creates an empty list.
-     * @param <T> The type of the empty list.
-     * @return An empty list.
-     */
-    static <T> List<T> iEmptyList(){
-        return new ArrayList<>();
+        return differenceWith(array, values, Common.iBiPredicateFromComparator(comparator));
     }
     
     /**
@@ -298,7 +245,7 @@ public class Arrays {
         }
         Objects.requireNonNull(array);
         if(n >= array.size()){
-            return iEmptyList();
+            return Common.iEmptyList();
         }
         return array.subList(n, array.size());
     }
@@ -329,7 +276,7 @@ public class Arrays {
         }
         Objects.requireNonNull(array);
         if(n >= array.size()){
-            return iEmptyList();
+            return Common.iEmptyList();
         }
         return array.subList(0, array.size() - n);
     }
@@ -380,17 +327,6 @@ public class Arrays {
     }
     
     /**
-     * Drop elements from the beginning until a null value is reached.
-     * @param <T> The type in the list.
-     * @param array The list to test.
-     * @return A list with the elements removed from the beginning that weren't null.
-     * @throws NullPointerException Array is null.
-     */
-    public static <T> List<T> dropWhile(List<T> array){
-        return dropWhile(array, Common.iIdentityPredicate());
-    }
-    
-    /**
      * Drop elements from the end until a predicate returns false.
      * Note that the array supplied to the predicate cannot be modified.
      * @param <T> The type contained in the list.
@@ -422,17 +358,6 @@ public class Arrays {
     public static <T> List<T> dropRightWhile(List<T> array, Predicate<T> predicate){
         Objects.requireNonNull(predicate);
         return dropRightWhile(array, (value, index, list) -> predicate.test(value));
-    }
-    
-    /**
-     * Drop elements from the end until reaching a null value.
-     * @param <T> The type contained in the list.
-     * @param array The list to drop from.
-     * @return A list with the elements removed from the end that were non-null.
-     * @throws IllegalArgumentException Array or invalidValues is null.
-     */
-    public static <T> List<T> dropRightWhile(List<T> array){
-        return dropRightWhile(array, Common.iIdentityPredicate());
     }
     
     /**
@@ -530,17 +455,6 @@ public class Arrays {
     }
     
     /**
-     * Find the first item in the array that isn't null.
-     * @param <T> The type in the list.
-     * @param array The array to test.
-     * @return The index of the passing value, or -1 if not found.
-     * @throws NullPointerException Array is null.
-     */
-    public static <T> int findIndex(List<T> array){
-        return findIndex(array, Common.iIdentityPredicate(), 0);
-    }
-    
-    /**
      * Find the last item in the array that matches a predicate.
      * @param <T> The type in the array.
      * @param array The array to search.
@@ -574,17 +488,6 @@ public class Arrays {
      */
     public static <T> int findLastIndex(List<T> array, Predicate<T> predicate){
         return findLastIndex(array, predicate, array.size() - 1);
-    }
-    
-    /**
-     * Find the last item in the array that is non-null.
-     * @param <T> The type in the array.
-     * @param array The array to search.
-     * @return The index of the last array to match the predicate, or -1 if not found.
-     * @throws NullPointerException Array is null.
-     */
-    public static <T> int findLastIndex(List<T> array){
-        return findLastIndex(array, Common.iIdentityPredicate(), array.size() - 1);
     }
     
     /**
@@ -758,18 +661,6 @@ public class Arrays {
     
     /**
      * Creates a list containing only common values between many lists.
-     * @param <T> The type in the lists
-     * @param arrays The arrays to check.
-     * @return A list of values each list contains.
-     * @throws NullPointerException The list of lists is null, or one of the sublists
-     * is null.
-     */
-    public static <T> List<T> intersectionBy(List<List<T>> arrays){
-        return intersectionBy(arrays, Common.iIdentity());
-    }
-    
-    /**
-     * Creates a list containing only common values between many lists.
      * @param <T> The type in the lists.
      * @param arrays The arrays to check.
      * @param comparator The function which checks for equality.
@@ -807,19 +698,7 @@ public class Arrays {
      * is null, or the comparator is null.
      */
     public static <T> List<T> intersectionWith(List<List<T>> arrays, Comparator<T> comparator){
-        return intersectionWith(arrays, iBiPredicateFromComparator(comparator));
-    }
-    
-    /**
-     * Creates a list containing only common values between many lists.
-     * @param <T> The type in the lists
-     * @param arrays The arrays to check.
-     * @return A list of values each list contains.
-     * @throws NullPointerException The list of lists is null, or one of the sublists
-     * is null.
-     */
-    public static <T> List<T> intersectionWith(List<List<T>> arrays){
-        return intersection(arrays);
+        return intersectionWith(arrays, Common.iBiPredicateFromComparator(comparator));
     }
     
     /**
@@ -986,19 +865,6 @@ public class Arrays {
     }
     
     /**
-     * Removes values from a list, without specifying a mapping function
-     * This mutates the list. Use differenceBy() for a non-mutating version.
-     * @param <T> The type in each list.
-     * @param array The starting array.
-     * @param values The values to pull.
-     * @return The modified list.
-     * @throws NullPointerException Array or values is null.
-     */
-    public static <T> List<T> pullAllBy(List<T> array, List<T> values){
-        return pullAllBy(array, values, Common.iIdentity());
-    }
-    
-    /**
      * Remove values from a list, using a BiPredicate for checking equality.
      * This mutates the list. Use differenceWith() for a non-mutating version.
      * @param <T> The type in the list.
@@ -1037,20 +903,7 @@ public class Arrays {
      */
     public static <T> List<T> pullAllWith(List<T> array, List<T> values, Comparator<T> comparator){
         Objects.requireNonNull(comparator);
-        return pullAllWith(array, values, iBiPredicateFromComparator(comparator));
-    }
-    
-    /**
-     * Removes all values specified from the list.
-     * This operation mutates the list. Use differenceWith() for non-mutation.
-     * @param <T> The type in the list.
-     * @param array The array to remove from.
-     * @param values The values to remove.
-     * @return The instance of the provided array.
-     * @throws NullPointerException array or values is null.
-     */
-    public static <T> List<T> pullAllWith(List<T> array, List<T> values){
-        return pullAll(array, values);
+        return pullAllWith(array, values, Common.iBiPredicateFromComparator(comparator));
     }
     
     /**
@@ -1139,18 +992,6 @@ public class Arrays {
     public static <T> List<T> remove(List<T> array, Predicate<T> predicate){
         Objects.requireNonNull(predicate);
         return remove(array, Common.iArrayPredicateFromPredicate(predicate));
-    }
-    
-    /**
-     * Remove elements from an array that are non-null.
-     * This operation mutates the list. Use filter() for non-mutation.
-     * @param <T> The type in the array.
-     * @param array The array to remove from.
-     * @return The removed elements (nulls).
-     * @throws NullPointerException Array.
-     */
-    public static <T> List<T> remove(List<T> array){
-        return remove(array, Common.iIdentityPredicate());
     }
     
     /**
@@ -1279,31 +1120,6 @@ public class Arrays {
     }
     
     /**
-     * Uses a binary search to determine the lowest index to place a value in a sorted list
-     * @param <T> The type in the list.
-     * @param array The array to search.
-     * @param value The value to insert.
-     * @param comparator The comparator function.
-     * @return The index to insert the specified value.
-     * @throws NullPointerException Array or comparable are null.
-     */
-    public static <T> int sortedIndexBy(List<T> array, T value, Comparator<T> comparator){
-        return sortedIndexBy(array, value, Common.iIdentity(), comparator);
-    }
-    
-    /**
-     * Uses a binary search to determine the lowest index to place a value in a sorted list
-     * @param <T> The type in the list.
-     * @param array The array to search.
-     * @param value The value to insert.
-     * @return The index to insert the specified value.
-     * @throws NullPointerException Array or comparable are null.
-     */
-    public static <T extends Comparable> int sortedIndexBy(List<T> array, T value){
-        return sortedIndexBy(array, value, Common.iIdentity(), Comparator.naturalOrder());
-    }
-    
-    /**
      * Uses a binary search to determine the first index of a value in a sorted list.
      * @param <T> The type in the list.
      * @param array The array to search.
@@ -1407,31 +1223,6 @@ public class Arrays {
      */
     public static <T, R extends Comparable> int sortedLastIndexBy(List<T> array, T value, Function<T, R> iteratee){
         return sortedLastIndexBy(array, value, iteratee, Comparator.naturalOrder());
-    }
-    
-    /**
-     * Uses a binary search to determine the highest index to place a value in a sorted list
-     * @param <T> The type in the list.
-     * @param array The array to search.
-     * @param value The value to insert.
-     * @param comparator The comparator function.
-     * @return The index to insert the specified value.
-     * @throws NullPointerException Array or comparable are null.
-     */
-    public static <T> int sortedLastIndexBy(List<T> array, T value, Comparator<T> comparator){
-        return sortedLastIndexBy(array, value, Common.iIdentity(), comparator);
-    }
-    
-    /**
-     * Uses a binary search to determine the highest index to place a value in a sorted list
-     * @param <T> The type in the list.
-     * @param array The array to search.
-     * @param value The value to insert.
-     * @return The index to insert the specified value.
-     * @throws NullPointerException Array or comparable are null.
-     */
-    public static <T extends Comparable> int sortedLastIndexBy(List<T> array, T value){
-        return sortedLastIndexBy(array, value, Common.iIdentity(), Comparator.naturalOrder());
     }
     
     /**
@@ -1606,16 +1397,6 @@ public class Arrays {
     }
     
     /**
-     * Retrieves elements from the beginning of the list until one returns null
-     * @param <T> The type in the list.
-     * @param array The array to take from
-     * @return The beginning elements, until one returns null.
-     */
-    public static <T> List<T> takeWhile(List<T> array){
-        return takeWhile(array, Common.iIdentityPredicate());
-    }
-    
-    /**
      * Retrieves elements from the end of the list until a predicate returns false. 
      * @param <T> The type in the list.
      * @param array The array to take from.
@@ -1644,16 +1425,6 @@ public class Arrays {
     public static <T> List<T> takeRightWhile(List<T> array, Predicate<T> predicate){
         Objects.requireNonNull(predicate);
         return takeRightWhile(array, Common.iArrayPredicateFromPredicate(predicate));
-    }
-    
-    /**
-     * Retrieves elements from the end of the list until one returns null. 
-     * @param <T> The type in the list.
-     * @param array The array to take from.
-     * @return The elements from the end of the list that tested true.
-     */
-    public static <T> List<T> takeRightWhile(List<T> array){
-        return takeRightWhile(array, Common.iIdentityPredicate());
     }
     
     /**
@@ -1705,18 +1476,6 @@ public class Arrays {
     }
     
     /**
-     * Creates an array of unique values from the given arrays.
-     * @param <T> The type in the lists.
-     * @param arrays The array of lists to unionize.
-     * @return A unionized list.
-     */
-    public static <T> List<T> unionBy(List<List<T>> arrays){
-        Objects.requireNonNull(arrays);
-        arrays.forEach(i -> Objects.requireNonNull(i));
-        return iUnion(arrays, Common.iIdentity(), Objects::equals);
-    }
-    
-    /**
      * Creates an array of unique values from the given arrays, using a BiPredicate to determine equality.
      * @param <T> The type in the arrays.
      * @param arrays The array of arrays to unionize.
@@ -1741,19 +1500,7 @@ public class Arrays {
         Objects.requireNonNull(arrays);
         arrays.forEach(i -> Objects.requireNonNull(i));
         Objects.requireNonNull(comparator);
-        return iUnion(arrays, Common.iIdentity(), iBiPredicateFromComparator(comparator));
-    }
-    
-    /**
-     * Creates an array of unique values from the given arrays.
-     * @param <T> The type in the arrays.
-     * @param arrays The array of arrays to unionize.
-     * @return A unionized list.
-     */
-    public static <T> List<T> unionWith(List<List<T>> arrays){
-        Objects.requireNonNull(arrays);
-        arrays.forEach(i -> Objects.requireNonNull(i));
-        return iUnion(arrays, Common.iIdentity(), Objects::equals);
+        return iUnion(arrays, Common.iIdentity(), Common.iBiPredicateFromComparator(comparator));
     }
     
     /**
@@ -1781,17 +1528,6 @@ public class Arrays {
     }
     
     /**
-     * Creates an array of unique values from a given array.
-     * @param <T> The type in the list.
-     * @param array The array to get unique values from.
-     * @return The unique values of the array.
-     */
-    public static <T> List<T> uniqBy(List<T> array){
-        Objects.requireNonNull(array);
-        return iUnion(java.util.Arrays.asList(array), Common.iIdentity(), Objects::equals);
-    }
-    
-    /**
      * Creates an array of unique values from a given array, using a BiPredicate to test equality.
      * @param <T> The type in the array.
      * @param array The array to get unique values from.
@@ -1814,18 +1550,7 @@ public class Arrays {
     public static <T> List<T> uniqWith(List<T> array, Comparator<T> comparator){
         Objects.requireNonNull(array);
         Objects.requireNonNull(comparator);
-        return iUnion(java.util.Arrays.asList(array), Common.iIdentity(), iBiPredicateFromComparator(comparator));
-    }
-    
-    /**
-     * Creates an array of unique values from a given array.
-     * @param <T> The type in the array.
-     * @param array The array to get unique values from.
-     * @return The unique values of the array.
-     */
-    public static <T> List<T> uniqWith(List<T> array){
-        Objects.requireNonNull(array);
-        return iUnion(java.util.Arrays.asList(array), Common.iIdentity(), Objects::equals);
+        return iUnion(java.util.Arrays.asList(array), Common.iIdentity(), Common.iBiPredicateFromComparator(comparator));
     }
     
     /**
@@ -1882,23 +1607,6 @@ public class Arrays {
         }
         Objects.requireNonNull(iteratee);
         return iUnzip(arrays, iteratee);
-    }
-    
-    /**
-     * Unzip a previously zipped list.
-     * @param <T> The type in the array.
-     * @param arrays The list of lists to unzip.
-     * @return The unzipped list.
-     */
-    public static <T> List<List<T>> unzipWith(List<List<T>> arrays){
-        Objects.requireNonNull(arrays);
-        int size = arrays.get(0).size();
-        for(List<T> array : arrays){
-            if(array.size() != size){
-                throw new IllegalArgumentException("All arrays must be the same size");
-            }
-        }
-        return iUnzip(arrays, Common.iIdentity());
     }
     
     /**
@@ -1993,20 +1701,6 @@ public class Arrays {
      * Create an array of unique values that are the symmetric difference of the given arrays.
      * Note that this is not a true xor, like the original. More than one
      * occurrence of a value results in its exclusion.
-     * @param <T> The type in the list.
-     * @param arrays The list of lists.
-     * @return The list, with duplicates removed.
-     */
-    public static <T> List<T> xorBy(List<List<T>> arrays){
-        Objects.requireNonNull(arrays);
-        arrays.forEach(i -> Objects.requireNonNull(i));
-        return iXor(arrays, Common.iIdentity(), Objects::equals);
-    }
-    
-    /**
-     * Create an array of unique values that are the symmetric difference of the given arrays.
-     * Note that this is not a true xor, like the original. More than one
-     * occurrence of a value results in its exclusion.
      * @param <T> The type in the array.
      * @param arrays The list of lists to xor.
      * @param comparator The comparator used to determine equality.
@@ -2032,21 +1726,7 @@ public class Arrays {
         Objects.requireNonNull(arrays);
         arrays.forEach(i -> Objects.requireNonNull(i));
         Objects.requireNonNull(comparator);
-        return iXor(arrays, Common.iIdentity(), iBiPredicateFromComparator(comparator));
-    }
-    
-    /**
-     * Create an array of unique values that are the symmetric difference of the given arrays.
-     * Note that this is not a true xor, like the original. More than one
-     * occurrence of a value results in its exclusion.
-     * @param <T> The type in the array.
-     * @param arrays The list of lists to xor.
-     * @return The list, with duplicates removed.
-     */
-    public static <T> List<T> xorWith(List<List<T>> arrays){
-        Objects.requireNonNull(arrays);
-        arrays.forEach(i -> Objects.requireNonNull(i));
-        return iXor(arrays, Common.iIdentity(), Objects::equals);
+        return iXor(arrays, Common.iIdentity(), Common.iBiPredicateFromComparator(comparator));
     }
     
     /**
@@ -2119,24 +1799,5 @@ public class Arrays {
         }
         Objects.requireNonNull(iteratee);
         return iUnzip(arrays, iteratee);
-    }
-    
-    /**
-     * Zips a list of lists.
-     * After zipping, all the first elements of the given arrays are returned in
-     * the first list, all the second elements in the second list, and so on.
-     * @param <T> The type contained in the list of lists.
-     * @param arrays The list of lists to zip.
-     * @return The zipped list.
-     */
-    public static <T> List<List<T>> zipWith(List<List<T>> arrays){
-        Objects.requireNonNull(arrays);
-        int size = arrays.get(0).size();
-        for(List<T> array : arrays){
-            if(array.size() != size){
-                throw new IllegalArgumentException("All arrays must be the same size");
-            }
-        }
-        return iUnzip(arrays, Common.iIdentity());
     }
 }
