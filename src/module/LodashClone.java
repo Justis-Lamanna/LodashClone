@@ -2482,4 +2482,150 @@ public class LodashClone {
     public static <K, V> Map<K, V> filter(Map<K, V> collection){
         return filter(collection, iIdentityMapPredicate());
     }
+    
+    /**
+     * Internal function to find a value in a list.
+     * This only works for list, because using for maps doesn't really make sense.
+     * @param <T> The type in the list.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @param fromIndex The starting index.
+     * @param up True if the search should start from beginning, false for end.
+     * @return The found element, or null if none found.
+     */
+    static <T> T iFind(List<T> collection, ArrayPredicate<T> predicate, int fromIndex, boolean up){
+        if(up){
+            for(int index = fromIndex; index < collection.size(); index++){
+                if(predicate.test(collection.get(index), index, collection)){
+                    return collection.get(index);
+                }
+            }
+        } else {
+            for(int index = fromIndex; index >= 0; index--){
+                if(predicate.test(collection.get(index), index, collection)){
+                    return collection.get(index);
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Internal function to find a value in a map.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @return The found key, or null.
+     */
+    static <K, V> K iFind(Map<K, V> collection, MapPredicate<K, V> predicate){
+        for(K key : collection.keySet()){
+            if(predicate.test(collection.get(key), key, collection)){
+                return key;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Find a value that matches a predicate.
+     * @param <T> The type in the list.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @param start The starting index to search.
+     * @return The found item, or null if none was found.
+     */
+    public static <T> T find(List<T> collection, ArrayPredicate<T> predicate, int start){
+        List<T> immutableCollection = Collections.unmodifiableList(Objects.requireNonNull(collection));
+        return iFind(immutableCollection, Objects.requireNonNull(predicate), start, true);
+    }
+    
+    /**
+     * Find a value that matches a predicate.
+     * @param <T> The type in the list.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @param start The starting index to search.
+     * @return The found item, or null if none was found.
+     */
+    public static <T> T find(List<T> collection, Predicate<T> predicate, int start){
+        List<T> immutableCollection = Collections.unmodifiableList(Objects.requireNonNull(collection));
+        ArrayPredicate<T> arrayPredicate = iArrayPredicateFromPredicate(Objects.requireNonNull(predicate));
+        return iFind(immutableCollection, arrayPredicate, start, true);
+    }
+    
+    /**
+     * Find a value that matches a predicate.
+     * @param <T> The type in the list.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @return The found item, or null if none was found.
+     */
+    public static <T> T find(List<T> collection, ArrayPredicate<T> predicate){
+        List<T> immutableCollection = Collections.unmodifiableList(Objects.requireNonNull(collection));
+        return iFind(immutableCollection, Objects.requireNonNull(predicate), 0, true);
+    }
+    
+    /**
+     * Find a key whose value matches a predicate.
+     * @param <K> The type of keys in the collection.
+     * @param <V> The type of values in the collection.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @return The found item, or null if none was found.
+     */
+    public static <K, V> K find(Map<K, V> collection, MapPredicate<K, V> predicate){
+        Map<K, V> immutableCollection = Collections.unmodifiableMap(Objects.requireNonNull(collection));
+        return iFind(immutableCollection, Objects.requireNonNull(predicate));
+    }
+    
+    /**
+     * Find a value that matches a predicate.
+     * @param <T> The type in the list.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @return The found item, or null if none was found.
+     */
+    public static <T> T find(List<T> collection, Predicate<T> predicate){
+        List<T> immutableCollection = Collections.unmodifiableList(Objects.requireNonNull(collection));
+        ArrayPredicate<T> arrayPredicate = iArrayPredicateFromPredicate(Objects.requireNonNull(predicate));
+        return iFind(immutableCollection, arrayPredicate, 0, true);
+    }
+    
+    /**
+     * Find a key whose value matches a predicate.
+     * @param <K> The type of keys in the collection.
+     * @param <V> The type of values in the collection.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @return The found item, or null if none was found.
+     */
+    public static <K, V> K find(Map<K, V> collection, Predicate<V> predicate){
+        Map<K, V> immutableCollection = Collections.unmodifiableMap(Objects.requireNonNull(collection));
+        MapPredicate<K, V> mapPredicate = iMapPredicateFromPredicate(Objects.requireNonNull(predicate));
+        return iFind(immutableCollection, mapPredicate);
+    }
+    
+    /**
+     * Find the first non-null value.
+     * @param <T> The type in the list.
+     * @param collection The collection to search.
+     * @return The found item, or null if none was found.
+     */
+    public static <T> T find(List<T> collection){
+        List<T> immutableCollection = Collections.unmodifiableList(Objects.requireNonNull(collection));
+        return iFind(immutableCollection, iIdentityArrayPredicate(), 0, true);
+    }
+    
+    /**
+     * Find a key with a non-null value.
+     * @param <K> The type of keys in the collection.
+     * @param <V> The type of values in the collection.
+     * @param collection The collection to search.
+     * @return The found item, or null if none was found.
+     */
+    public static <K, V> K find(Map<K, V> collection){
+        Map<K, V> immutableCollection = Collections.unmodifiableMap(Objects.requireNonNull(collection));
+        return iFind(immutableCollection, iIdentityMapPredicate());
+    }
 }
