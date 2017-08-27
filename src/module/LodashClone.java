@@ -31,8 +31,10 @@ public class LodashClone {
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, null, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
         List<List<Integer>> testList3 = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(1, 4));
-        System.out.println(zip(testList3));
+        System.out.println(every(testList2));
     }
+    
+    //------Array Methods-------
     
     /**
      * An identity predicate, which returns true if item is non-null.
@@ -41,6 +43,25 @@ public class LodashClone {
      */
     static <T> Predicate<T> iIdentityPredicate(){
         return i -> i != null;
+    }
+    
+    /**
+     * An identity ArrayPredicate, which returns true if item is non-null.
+     * @param <T>
+     * @return 
+     */
+    static <T> ArrayPredicate<T> iIdentityArrayPredicate(){
+        return (v, i, a) -> v != null;
+    }
+    
+    /**
+     * Converts a predicate to an ArrayPredicate.
+     * @param <T> The type the Predicate tests for.
+     * @param predicate The predicate to convert.
+     * @return The converted arrayPredicate.
+     */
+    static <T> ArrayPredicate<T> iArrayPredicateFromPredicate(Predicate<T> predicate){
+        return (v, i, a) -> predicate.test(v);
     }
     
     /**
@@ -1162,7 +1183,7 @@ public class LodashClone {
      */
     public static <T> List<T> remove(List<T> array, Predicate<T> predicate){
         Objects.requireNonNull(predicate);
-        return remove(array, (v, i, a) -> predicate.test(v));
+        return remove(array, iArrayPredicateFromPredicate(predicate));
     }
     
     /**
@@ -1626,7 +1647,7 @@ public class LodashClone {
      */
     public static <T> List<T> takeWhile(List<T> array, Predicate<T> predicate){
         Objects.requireNonNull(predicate);
-        return takeWhile(array, (v, i, a) -> predicate.test(v));
+        return takeWhile(array, iArrayPredicateFromPredicate(predicate));
     }
     
     /**
@@ -1667,7 +1688,7 @@ public class LodashClone {
      */
     public static <T> List<T> takeRightWhile(List<T> array, Predicate<T> predicate){
         Objects.requireNonNull(predicate);
-        return takeRightWhile(array, (v, i, a) -> predicate.test(v));
+        return takeRightWhile(array, iArrayPredicateFromPredicate(predicate));
     }
     
     /**
@@ -2162,5 +2183,81 @@ public class LodashClone {
             }
         }
         return iUnzip(arrays, iIdentity());
+    }
+    
+    //------Collection Methods-------
+    
+    /**
+     * Creates an object, composed of transformations and the number of times they occurred.
+     * The map is created by applying the iteratee to each value in the collection.
+     * The key becomes the transformed value, and the value is the number of times it
+     * occurs.
+     * @param <T> The type in the array.
+     * @param <R> The type converted to.
+     * @param collection The collection to count.
+     * @param iteratee The mapping function called before counting.
+     * @return A list of mapped values and the number of times they occurred.
+     */
+    public static <T, R> Map<R, Integer> countBy(List<T> collection, Function<T, R> iteratee){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(iteratee);
+        Map<R, Integer> counts = new HashMap<>();
+        for(T value : collection){
+            R mappedValue = iteratee.apply(value);
+            counts.put(mappedValue, counts.getOrDefault(mappedValue, 0) + 1);
+        }
+        return counts;
+    }
+    
+    /**
+     * Creates an object, composed of values and the number of times they occurred.
+     * The key becomes the value, and the value is the number of times it
+     * occurs.
+     * @param <T> The type in the array.
+     * @param collection The collection to count.
+     * @return A list of mapped values and the number of times they occurred.
+     */
+    public static <T> Map<T, Integer> countBy(List<T> collection){
+        Objects.requireNonNull(collection);
+        Map<T, Integer> counts = new HashMap<>();
+        for(T value : collection){
+            counts.put(value, counts.getOrDefault(value, 0) + 1);
+        }
+        return counts;
+    }
+    
+    /**
+     * Check if a predicate is true for all members of a collection.
+     * @param <T> The type in the collection.
+     * @param collection The collection to check.
+     * @param predicate The predicate to check if a value is true.
+     * @return True if the predicate was true for every member of the collection.
+     */
+    public static <T> boolean every(List<T> collection, ArrayPredicate<T> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        List<T> immutableCollection = Collections.unmodifiableList(collection);
+        for(int index = 0; index < collection.size(); index++){
+            if(!predicate.test(collection.get(index), index, immutableCollection)){
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Check if a predicate is true for all members of a collection.
+     * @param <T> The type in the collection.
+     * @param collection The collection to check.
+     * @param predicate The predicate to check if a value is true.
+     * @return True if the predicate was true for every member of the collection.
+     */
+    public static <T> boolean every(List<T> collection, Predicate<T> predicate){
+        Objects.requireNonNull(predicate);
+        return every(collection, iArrayPredicateFromPredicate(predicate));
+    }
+    
+    public static <T> boolean every(List<T> collection){
+        return every(collection, iIdentityArrayPredicate());
     }
 }
