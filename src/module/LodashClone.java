@@ -7,6 +7,7 @@ package module;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -51,6 +52,15 @@ public class LodashClone {
      * @return 
      */
     static <T> ArrayPredicate<T> iIdentityArrayPredicate(){
+        return (v, i, a) -> v != null;
+    }
+    
+    /**
+     * An identity MapPredicate, which returns true if value is non-null.
+     * @param <T>
+     * @return 
+     */
+    static <K, V> MapPredicate<K, V> iIdentityMapPredicate(){
         return (v, i, a) -> v != null;
     }
     
@@ -2188,6 +2198,48 @@ public class LodashClone {
     //------Collection Methods-------
     
     /**
+     * Internal function to get a list of indexes from a list.
+     * @param <T> The type in the list.
+     * @param list The list to get the indexes of.
+     * @return The list of indexes.
+     */
+    static <T> List<Integer> iGetIdsFromList(List<T> list){
+        List<Integer> indices = new ArrayList<>();
+        for(int index = 0; index < list.size(); index++){
+            indices.add(index);
+        }
+        return indices;
+    }
+    
+    /**
+     * Internal function to turn a Predicate into a MapPredicate
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param predicate The predicate to wrap.
+     * @return The Predicate as a MapPredicate.
+     */
+    static <K, V> MapPredicate<K, V> iMapPredicateFromPredicate(Predicate<V> predicate){
+        return (v, i, c) -> predicate.test(v);
+    }
+    
+    /**
+     * Internal function to perform countBy
+     * @param <V> The type of the value.
+     * @param <R> The type the value is converted to before counting.
+     * @param collection The collection to iterate through.
+     * @param iteratee The function to map the value before counting.
+     * @return A list of values and their counts.
+     */
+    static <V, R> Map<R, Integer> iCountBy(Collection<V> collection, Function<V, R> iteratee){
+        Map<R, Integer> counts = new HashMap<>();
+        for(V value : collection){
+            R mappedValue = iteratee.apply(value);
+            counts.put(mappedValue, counts.getOrDefault(mappedValue, 0) + 1);
+        }
+        return counts;
+    }
+    
+    /**
      * Creates an object, composed of transformations and the number of times they occurred.
      * The map is created by applying the iteratee to each value in the collection.
      * The key becomes the transformed value, and the value is the number of times it
@@ -2201,12 +2253,25 @@ public class LodashClone {
     public static <T, R> Map<R, Integer> countBy(List<T> collection, Function<T, R> iteratee){
         Objects.requireNonNull(collection);
         Objects.requireNonNull(iteratee);
-        Map<R, Integer> counts = new HashMap<>();
-        for(T value : collection){
-            R mappedValue = iteratee.apply(value);
-            counts.put(mappedValue, counts.getOrDefault(mappedValue, 0) + 1);
-        }
-        return counts;
+        return iCountBy(collection, iteratee);
+    }
+    
+    /**
+     * Creates an object, composed of transformations and the number of times they occurred.
+     * The map is created by applying the iteratee to each value in the collection.
+     * The key becomes the transformed value, and the value is the number of times it
+     * occurs.
+     * @param <K> The type of the map's key.
+     * @param <V> The type of the map's value.
+     * @param <R> The type converted to.
+     * @param collection The collection to count.
+     * @param iteratee The mapping function called before counting.
+     * @return A list of mapped values and the number of times they occurred.
+     */
+    public static <K, V, R> Map<R, Integer> countBy(Map<K, V> collection, Function<V, R> iteratee){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(iteratee);
+        return iCountBy(collection.values(), iteratee);
     }
     
     /**
@@ -2219,11 +2284,41 @@ public class LodashClone {
      */
     public static <T> Map<T, Integer> countBy(List<T> collection){
         Objects.requireNonNull(collection);
-        Map<T, Integer> counts = new HashMap<>();
-        for(T value : collection){
-            counts.put(value, counts.getOrDefault(value, 0) + 1);
+        return iCountBy(collection, iIdentity());
+    }
+    
+    /**
+     * Creates an object, composed of values and the number of times they occurred.
+     * The key becomes the value, and the value is the number of times it
+     * occurs.
+     * @param <K> The key's type in the map.
+     * @param <V> The value's type in the map.
+     * @param collection The collection to count.
+     * @return A list of mapped values and the number of times they occurred.
+     */
+    public static <K, V> Map<V, Integer> countBy(Map<K, V> collection){
+        Objects.requireNonNull(collection);
+        return iCountBy(collection.values(), iIdentity());
+    }
+    
+    /**
+     * Internal function for every.
+     * @param <V> The type of the values.
+     * @param <I> The type of the identifiers (indexes/keys).
+     * @param <C> The type of the collection.
+     * @param collection The collection to iterate through.
+     * @param ids The list of identifiers.
+     * @param getValues The function to retrieve values from the identifiers.
+     * @param predicate The function to test if a value passes or fails.
+     * @return True if everything passes, false if something fails.
+     */
+    static <V, I, C> boolean iEvery(C collection, Collection<I> ids, Function<I, V> getValues, CollectionPredicate<V, I, C> predicate){
+        for(I id : ids){
+            if(!predicate.test(getValues.apply(id), id, collection)){
+                return false;
+            }
         }
-        return counts;
+        return true;
     }
     
     /**
@@ -2237,12 +2332,22 @@ public class LodashClone {
         Objects.requireNonNull(collection);
         Objects.requireNonNull(predicate);
         List<T> immutableCollection = Collections.unmodifiableList(collection);
-        for(int index = 0; index < collection.size(); index++){
-            if(!predicate.test(collection.get(index), index, immutableCollection)){
-                return false;
-            }
-        }
-        return true;
+        return iEvery(immutableCollection, iGetIdsFromList(collection), collection::get, predicate);
+    }
+    
+    /**
+     * Check if a predicate is true for all members of a collection.
+     * @param <K> The type of the keys in the collection.
+     * @param <V> The type of the values in the collection.
+     * @param collection The collection to check.
+     * @param predicate The predicate to check if a value is true.
+     * @return True if the predicate was true for every member of the collection.
+     */
+    public static <K, V> boolean every(Map<K, V> collection, MapPredicate<K, V> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        Map<K, V> immutableCollection = Collections.unmodifiableMap(collection);
+        return iEvery(immutableCollection, immutableCollection.keySet(), collection::get, predicate);
     }
     
     /**
@@ -2257,7 +2362,124 @@ public class LodashClone {
         return every(collection, iArrayPredicateFromPredicate(predicate));
     }
     
+    /**
+     * Check if a predicate is true for all members of a collection.
+     * @param <K> The type of the keys in the collection.
+     * @param <V> The type of the values in the collection.
+     * @param collection The collection to check.
+     * @param predicate The predicate to check if a value is true.
+     * @return True if the predicate was true for every member of the collection.
+     */
+    public static <K, V> boolean every(Map<K, V> collection, Predicate<V> predicate){
+        Objects.requireNonNull(predicate);
+        return every(collection, iMapPredicateFromPredicate(predicate));
+    }
+    
+    /**
+     * Check if a predicate is non-null for all members of a collection.
+     * @param <T> The type in the collection.
+     * @param collection The collection to check.
+     * @return True if each member of the collection is non-null.
+     */
     public static <T> boolean every(List<T> collection){
         return every(collection, iIdentityArrayPredicate());
+    }
+    
+    /**
+     * Check if a predicate is non-null for all members of a collection.
+     * @param <K> The type of the keys in the collection.
+     * @param <V> The type of the values in the collection.
+     * @param collection The collection to check.
+     * @return True if each member of the collection is non-null.
+     */
+    public static <K, V> boolean every(Map<K, V> collection){
+        return every(collection, iIdentityMapPredicate());
+    }
+    
+    /**
+     * Create a list of all values from a collection that pass a predicate.
+     * @param <T> The type in the collection.
+     * @param collection The collection to filter.
+     * @param predicate The predicate to test against.
+     * @return The list of all elements from collection that passed the predicate.
+     */
+    public static <T> List<T> filter(List<T> collection, ArrayPredicate<T> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        List<T> filter = new ArrayList<>();
+        List<T> immutableCollection = Collections.unmodifiableList(collection);
+        for(int index = 0; index < collection.size(); index++){
+            if(predicate.test(collection.get(index), index, immutableCollection)){
+                filter.add(collection.get(index));
+            }
+        }
+        return filter;
+    }
+    
+    /**
+     * Create a list of all values from a collection that pass a predicate.
+     * @param <K> The type of the keys in the collection.
+     * @param <V> The type of the values in the collection.
+     * @param collection The collection to filter.
+     * @param predicate The predicate to test against.
+     * @return The list of all elements from collection that passed the predicate.
+     */
+    public static <K, V> Map<K, V> filter(Map<K, V> collection, MapPredicate<K, V> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        Map<K, V> filter = new HashMap<>();
+        Map<K, V> immutableCollection = Collections.unmodifiableMap(collection);
+        for(K key : collection.keySet()){
+            if(predicate.test(collection.get(key), key, immutableCollection)){
+                filter.put(key, collection.get(key));
+            }
+        }
+        return filter;
+    }
+    
+    /**
+     * Create a list of all values from a collection that pass a predicate.
+     * @param <T> The type in the collection.
+     * @param collection The collection to filter.
+     * @param predicate The predicate to test against.
+     * @return The list of all elements from collection that passed the predicate.
+     */
+    public static <T> List<T> filter(List<T> collection, Predicate<T> predicate){
+        Objects.requireNonNull(predicate);
+        return filter(collection, iArrayPredicateFromPredicate(predicate));
+    }
+    
+    /**
+     * Create a list of all values from a collection that pass a predicate.
+     * @param <K> The type of the keys in the collection.
+     * @param <V> The type of the values in the collection.
+     * @param collection The collection to filter.
+     * @param predicate The predicate to test against.
+     * @return The list of all elements from collection that passed the predicate.
+     */
+    public static <K, V> Map<K, V> filter(Map<K, V> collection, Predicate<V> predicate){
+        Objects.requireNonNull(predicate);
+        return filter(collection, iMapPredicateFromPredicate(predicate));
+    }
+    
+    /**
+     * Create a list of all values from a collection that are non-null.
+     * @param <T> The type in the collection.
+     * @param collection The collection to filter.
+     * @return The list of all elements from collection that are non-null.
+     */
+    public static <T> List<T> filter(List<T> collection){
+        return filter(collection, iIdentityArrayPredicate());
+    }
+    
+    /**
+     * Create a list of all values from a collection that are non-null.
+     * @param <K> The type of the keys in the collection.
+     * @param <V> The type of the values in the collection.
+     * @param collection The collection to filter.
+     * @return The list of all elements from collection that are non-null.
+     */
+    public static <K, V> Map<K, V> filter(Map<K, V> collection){
+        return filter(collection, iIdentityMapPredicate());
     }
 }

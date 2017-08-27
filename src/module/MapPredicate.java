@@ -5,13 +5,12 @@
  */
 package module;
 
-import java.util.List;
+import java.util.Map;
 
 /**
- * A predicate used in array testing.
- * @author justislamanna
- * @param <T> The type in the list.
+ * A predicate to use during map predicates.
+ * @author Justis
  */
-public interface ArrayPredicate<T> extends CollectionPredicate<T, Integer, List<T>>{
+public interface MapPredicate<K, V> extends CollectionPredicate<V, K, Map<K, V>> {
     
 }
