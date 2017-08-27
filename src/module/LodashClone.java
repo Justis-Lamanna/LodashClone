@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -29,7 +31,7 @@ public class LodashClone {
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, null, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
         List<List<Integer>> testList3 = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(1, 4));
-        System.out.println(xor(testList3));
+        System.out.println(zip(testList3));
     }
     
     /**
@@ -2069,5 +2071,96 @@ public class LodashClone {
         Objects.requireNonNull(arrays);
         arrays.forEach(i -> Objects.requireNonNull(i));
         return iXor(arrays, iIdentity(), Objects::equals);
+    }
+    
+    /**
+     * Zips a list of lists.
+     * After zipping, all the first elements of the given arrays are returned in
+     * the first list, all the second elements in the second list, and so on.
+     * @param <T> The type contained in the list of lists.
+     * @param arrays The list of lists to zip.
+     * @return The zipped list.
+     */
+    public static <T> List<List<T>> zip(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        int size = arrays.get(0).size();
+        for(List<T> array : arrays){
+            if(array.size() != size){
+                throw new IllegalArgumentException("All arrays must be the same size");
+            }
+        }
+        return iUnzip(arrays, iIdentity());
+    }
+    
+    /**
+     * Zips a list of lists.
+     * After zipping, all the first elements of the given arrays are returned in
+     * the first list, all the second elements in the second list, and so on.
+     * @param <T> The type contained in the list of lists.
+     * @param arrays The list of lists to zip.
+     * @return The zipped list.
+     */
+    public static <T> List<List<T>> zip(List<T>... arrays){
+        return zip(Arrays.asList(arrays));
+    }
+    
+    /**
+     * Combines a list of keys and a list of values into a Map.
+     * @param <T> The type the keys should be.
+     * @param <R> The type the values should be.
+     * @param keys The list of keys.
+     * @param values The list of values.
+     * @return The map created by splicing the keys and values.
+     */
+    public static <T, R> Map<T, R> zipObject(List<T> keys, List<R> values){
+        Objects.requireNonNull(keys);
+        Objects.requireNonNull(values);
+        if(keys.size() != values.size()){
+            throw new IllegalArgumentException("Props and values must be the same size.");
+        }
+        Map<T, R> object = new HashMap<>();
+        for(int index = 0; index < keys.size(); index++){
+            object.put(keys.get(index), values.get(index));
+        }
+        return object;
+    }
+    
+    /**
+     * Zips a list, with an iteratee to specify how the results should combine.
+     * @param <T> The type contained in the list.
+     * @param <R> The type to turn the list into.
+     * @param arrays The list of lists to zip.
+     * @param iteratee The function to map each zipped list into.
+     * @return The zipped list, after being combined.
+     */
+    public static <T, R> List<R> zipWith(List<List<T>> arrays, Function<List<T>, R> iteratee){
+        Objects.requireNonNull(arrays);
+        int size = arrays.get(0).size();
+        for(List<T> array : arrays){
+            if(array.size() != size){
+                throw new IllegalArgumentException("All arrays must be the same size");
+            }
+        }
+        Objects.requireNonNull(iteratee);
+        return iUnzip(arrays, iteratee);
+    }
+    
+    /**
+     * Zips a list of lists.
+     * After zipping, all the first elements of the given arrays are returned in
+     * the first list, all the second elements in the second list, and so on.
+     * @param <T> The type contained in the list of lists.
+     * @param arrays The list of lists to zip.
+     * @return The zipped list.
+     */
+    public static <T> List<List<T>> zipWith(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        int size = arrays.get(0).size();
+        for(List<T> array : arrays){
+            if(array.size() != size){
+                throw new IllegalArgumentException("All arrays must be the same size");
+            }
+        }
+        return iUnzip(arrays, iIdentity());
     }
 }
