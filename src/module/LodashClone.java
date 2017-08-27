@@ -28,8 +28,8 @@ public class LodashClone {
     public static void main(String[] args){
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, null, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
-        List<List<Integer>> testList3 = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6));
-        System.out.println(unzipWith(testList3, i -> i.stream().reduce((a, b) -> a+b).get()));
+        List<List<Integer>> testList3 = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(1, 4));
+        System.out.println(xor(testList3));
     }
     
     /**
@@ -1940,5 +1940,134 @@ public class LodashClone {
             }
         }
         return withoutArray;
+    }
+    
+    /**
+     * Create a list containing the original values, minus any excluded ones.
+     * @param <T> The type contained in the list.
+     * @param array The base array.
+     * @param exclusions A list of values to exclude from the base array.
+     * @return A list containing the values in array, minus the ones in exclusions.
+     */
+    public static <T> List<T> without(List<T> array, T... exclusions){
+        return without(array, Arrays.asList(exclusions));
+    }
+    
+    /**
+     * Internal function for xor.
+     * @param <T> The type in the array.
+     * @param <R> The type converted to before comparison.
+     * @param arrays The arrays to xor.
+     * @param iteratee The mapper to convert the value before comparison.
+     * @param comparator The comparison function to determine equality.
+     * @return The xor'd list.
+     */
+    static <T, R> List<T> iXor(List<List<T>> arrays, Function<T, R> iteratee, BiPredicate<R, R> comparator){
+        List<T> xorArray = new ArrayList<>();
+        List<T> dontAdd = new ArrayList<>();
+        for(List<T> array : arrays){
+            for(T value : array){
+                if(!iContains(dontAdd, value, iteratee, comparator)){
+                    if(iContains(xorArray, value, iteratee, comparator)){
+                        xorArray.remove(value);
+                        dontAdd.add(value);
+                    } else {
+                        xorArray.add(value);
+                    }
+                }
+            }
+        }
+        return xorArray;
+    }
+    
+    /**
+     * Create an array of unique values that are the symmetric difference of the given arrays.
+     * Note that this is not a true xor, like the original. More than one
+     * occurrence of a value results in its exclusion.
+     * @param <T> The type in the list.
+     * @param arrays The list of lists.
+     * @return The list, with duplicates removed.
+     */
+    public static <T> List<T> xor(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        return iXor(arrays, iIdentity(), Objects::equals);
+    }
+    
+    /**
+     * Create an array of unique values that are the symmetric difference of the given arrays.
+     * Note that this is not a true xor, like the original. More than one
+     * occurrence of a value results in its exclusion.
+     * @param <T> The type in the list.
+     * @param <R> The type converted into before comparison.
+     * @param arrays The list of lists.
+     * @param iteratee The mapping function called before comparison.
+     * @return The list, with duplicates removed.
+     */
+    public static <T, R> List<T> xorBy(List<List<T>> arrays, Function<T, R> iteratee){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        Objects.requireNonNull(iteratee);
+        return iXor(arrays, iteratee, Objects::equals);
+    }
+    
+    /**
+     * Create an array of unique values that are the symmetric difference of the given arrays.
+     * Note that this is not a true xor, like the original. More than one
+     * occurrence of a value results in its exclusion.
+     * @param <T> The type in the list.
+     * @param arrays The list of lists.
+     * @return The list, with duplicates removed.
+     */
+    public static <T> List<T> xorBy(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        return iXor(arrays, iIdentity(), Objects::equals);
+    }
+    
+    /**
+     * Create an array of unique values that are the symmetric difference of the given arrays.
+     * Note that this is not a true xor, like the original. More than one
+     * occurrence of a value results in its exclusion.
+     * @param <T> The type in the array.
+     * @param arrays The list of lists to xor.
+     * @param comparator The comparator used to determine equality.
+     * @return The list, with duplicates removed.
+     */
+    public static <T> List<T> xorWith(List<List<T>> arrays, BiPredicate<T, T> comparator){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        Objects.requireNonNull(comparator);
+        return iXor(arrays, iIdentity(), comparator);
+    }
+    
+    /**
+     * Create an array of unique values that are the symmetric difference of the given arrays.
+     * Note that this is not a true xor, like the original. More than one
+     * occurrence of a value results in its exclusion.
+     * @param <T> The type in the array.
+     * @param arrays The list of lists to xor.
+     * @param comparator The comparator used to determine equality.
+     * @return The list, with duplicates removed.
+     */
+    public static <T> List<T> xorWith(List<List<T>> arrays, Comparator<T> comparator){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        Objects.requireNonNull(comparator);
+        return iXor(arrays, iIdentity(), iBiPredicateFromComparator(comparator));
+    }
+    
+    /**
+     * Create an array of unique values that are the symmetric difference of the given arrays.
+     * Note that this is not a true xor, like the original. More than one
+     * occurrence of a value results in its exclusion.
+     * @param <T> The type in the array.
+     * @param arrays The list of lists to xor.
+     * @return The list, with duplicates removed.
+     */
+    public static <T> List<T> xorWith(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        arrays.forEach(i -> Objects.requireNonNull(i));
+        return iXor(arrays, iIdentity(), Objects::equals);
     }
 }
