@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package module;
+package interfaces;
 
 import java.util.List;
 
@@ -13,14 +13,6 @@ import java.util.List;
  * @param <T> The type in the list. 
  * @param <R> The type output from the mapper.
  */
-public interface ArrayFunction<T, R> {
+public interface ArrayFunction<T, R> extends CollectionFunction<T, Integer, List<T>, R> {
     
-    /**
-     * Maps a value.
-     * @param value The value to test.
-     * @param index The index of the value.
-     * @param list The list that is being tested.
-     * @return The new value.
-     */
-    R map(T value, int index, List<T> list);
 }

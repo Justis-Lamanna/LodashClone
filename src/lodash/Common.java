@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import module.ArrayPredicate;
-import module.MapPredicate;
+import interfaces.ArrayPredicate;
+import interfaces.MapPredicate;
 
 /**
  *

@@ -3,11 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package module;
+package interfaces;
 
 /**
- * Parent of predicates, which take three values.
+ * Parent of collection-based predicates.
  * @author Justis
+ * @param <V> The type of the value.
+ * @param <I> The type of the identifier (Index/Key)
+ * @param <C> The type of collection.
  */
 public interface CollectionPredicate<V, I, C> {
     

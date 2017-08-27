@@ -13,9 +13,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import module.ArrayPredicate;
-import module.CollectionPredicate;
-import module.MapPredicate;
+import interfaces.ArrayPredicate;
+import interfaces.CollectionPredicate;
+import interfaces.MapPredicate;
 
 /**
  *
@@ -287,6 +287,9 @@ public class Collections {
     public static <T> T find(List<T> collection, Predicate<T> predicate, int start){
         List<T> immutableCollection = java.util.Collections.unmodifiableList(Objects.requireNonNull(collection));
         ArrayPredicate<T> arrayPredicate = Common.iArrayPredicateFromPredicate(Objects.requireNonNull(predicate));
+        if(start < 0 || start >= collection.size()){
+            throw new ArrayIndexOutOfBoundsException("Start must be in bounds");
+        }
         return iFind(immutableCollection, arrayPredicate, start, true);
     }
     
@@ -340,5 +343,61 @@ public class Collections {
         Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(Objects.requireNonNull(collection));
         MapPredicate<K, V> mapPredicate = Common.iMapPredicateFromPredicate(Objects.requireNonNull(predicate));
         return iFind(immutableCollection, mapPredicate);
+    }
+    
+    /**
+     * Find the last value that matches a predicate.
+     * @param <T> The type in the collection.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @param start The index to start searching from.
+     * @return The last element in the list that matches the predicate, or null if none found.
+     */
+    public static <T> T findLast(List<T> collection, ArrayPredicate<T> predicate, int start){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        if(start < 0 || start >= collection.size()){
+            throw new ArrayIndexOutOfBoundsException("Start must be in bounds");
+        }
+        return iFind(collection, predicate, start, false);
+    }
+    
+    /**
+     * Find the last value that matches a predicate.
+     * @param <T> The type in the collection.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @param start The index to start searching from.
+     * @return The last element in the list that matches the predicate, or null if none found.
+     */
+    public static <T> T findLast(List<T> collection, Predicate<T> predicate, int start){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        if(start < 0 || start >= collection.size()){
+            throw new ArrayIndexOutOfBoundsException("Start must be in bounds");
+        }
+        return iFind(collection, Common.iArrayPredicateFromPredicate(predicate), start, false);
+    }
+    
+    /**
+     * Find the last value that matches a predicate.
+     * @param <T> The type in the collection.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @return The last element in the list that matches the predicate, or null if none found.
+     */
+    public static <T> T findLast(List<T> collection, ArrayPredicate<T> predicate){
+        return findLast(collection, predicate, collection.size() - 1);
+    }
+    
+    /**
+     * Find the last value that matches a predicate.
+     * @param <T> The type in the collection.
+     * @param collection The collection to search.
+     * @param predicate The predicate to determine a match.
+     * @return The last element in the list that matches the predicate, or null if none found.
+     */
+    public static <T> T findLast(List<T> collection, Predicate<T> predicate){
+        return findLast(collection, predicate, collection.size() - 1);
     }
 }
