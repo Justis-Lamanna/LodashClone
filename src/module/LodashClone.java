@@ -28,9 +28,8 @@ public class LodashClone {
     public static void main(String[] args){
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, null, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
-        BiPredicate<Integer, Integer> testFunction = (i, j) -> i%2 == j%2;
-        //testList.add(sortedIndex(testList, 5), 5);
-        System.out.println(uniq(testList));
+        List<List<Integer>> testList3 = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6));
+        System.out.println(unzipWith(testList3, i -> i.stream().reduce((a, b) -> a+b).get()));
     }
     
     /**
@@ -1849,5 +1848,97 @@ public class LodashClone {
     public static <T> List<T> uniqWith(List<T> array){
         Objects.requireNonNull(array);
         return iUnion(Arrays.asList(array), iIdentity(), Objects::equals);
+    }
+    
+    /**
+     * Internal function to perform a zip/unzip.
+     * @param <T> The type in the list of lists.
+     * @param arrays The array of arrays to zip/unzip.
+     * @param iteratee The mapping function to determine how the array will be combined.
+     * @return The zipped/unzipped list.
+     */
+    static <T, R> List<R> iUnzip(List<List<T>> arrays, Function<List<T>, R> iteratee){
+        List<R> unzippedArrays = new ArrayList<>();
+        for(int index = 0; index < arrays.get(0).size(); index++){
+            List<T> unzippedArray = new ArrayList<>();
+            for(List<T> array : arrays){
+                unzippedArray.add(array.get(index));
+            }
+            unzippedArrays.add(iteratee.apply(unzippedArray));
+        }
+        return unzippedArrays;
+    }
+    
+    /**
+     * Unzip a previously zipped list.
+     * @param <T> The type in the array.
+     * @param arrays The list of lists to unzip.
+     * @return The unzipped list.
+     */
+    public static <T> List<List<T>> unzip(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        int size = arrays.get(0).size();
+        for(List<T> array : arrays){
+            if(array.size() != size){
+                throw new IllegalArgumentException("All arrays must be the same size");
+            }
+        }
+        return iUnzip(arrays, iIdentity());
+    }
+    
+    /**
+     * Unzips a previously zipped list, with an iteratee to specify how the results should combine.
+     * @param <T> The type contained in the list.
+     * @param <R> The type to turn the list into.
+     * @param arrays The list of lists to unzip.
+     * @param iteratee The function to map each unzipped list into.
+     * @return The unzipped list, after being combined.
+     */
+    public static <T, R> List<R> unzipWith(List<List<T>> arrays, Function<List<T>, R> iteratee){
+        Objects.requireNonNull(arrays);
+        int size = arrays.get(0).size();
+        for(List<T> array : arrays){
+            if(array.size() != size){
+                throw new IllegalArgumentException("All arrays must be the same size");
+            }
+        }
+        Objects.requireNonNull(iteratee);
+        return iUnzip(arrays, iteratee);
+    }
+    
+    /**
+     * Unzip a previously zipped list.
+     * @param <T> The type in the array.
+     * @param arrays The list of lists to unzip.
+     * @return The unzipped list.
+     */
+    public static <T> List<List<T>> unzipWith(List<List<T>> arrays){
+        Objects.requireNonNull(arrays);
+        int size = arrays.get(0).size();
+        for(List<T> array : arrays){
+            if(array.size() != size){
+                throw new IllegalArgumentException("All arrays must be the same size");
+            }
+        }
+        return iUnzip(arrays, iIdentity());
+    }
+    
+    /**
+     * Create a list containing the original values, minus any excluded ones.
+     * @param <T> The type contained in the list.
+     * @param array The base array.
+     * @param exclusions A list of values to exclude from the base array.
+     * @return A list containing the values in array, minus the ones in exclusions.
+     */
+    public static <T> List<T> without(List<T> array, List<T> exclusions){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(exclusions);
+        List<T> withoutArray = new ArrayList<>();
+        for(T value : array){
+            if(!exclusions.contains(value)){
+                withoutArray.add(value);
+            }
+        }
+        return withoutArray;
     }
 }
