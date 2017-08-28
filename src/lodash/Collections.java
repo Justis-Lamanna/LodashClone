@@ -5,6 +5,7 @@
  */
 package lodash;
 
+import interfaces.ArrayConsumer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,7 +16,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import interfaces.ArrayPredicate;
 import interfaces.CollectionPredicate;
+import interfaces.MapConsumer;
 import interfaces.MapPredicate;
+import java.util.function.Consumer;
 
 /**
  *
@@ -399,5 +402,111 @@ public class Collections {
      */
     public static <T> T findLast(List<T> collection, Predicate<T> predicate){
         return findLast(collection, predicate, collection.size() - 1);
+    }
+    
+    /**
+     * Internal function used for forEach
+     * @param <T> The type in the list.
+     * @param collection The collection to iterate over
+     * @param iteratee The function to call for each value.
+     * @param up True if starting at the beginning, false to start at the end.
+     */
+    static <T> void iForEach(List<T> collection, ArrayConsumer<T> iteratee, boolean up){
+        if(up){
+            for(int index = 0; index < collection.size(); index++){
+                iteratee.accept(collection.get(index), index, collection);
+            }
+        } else {
+            for(int index = collection.size() - 1; index >= 0; index--){
+                iteratee.accept(collection.get(index), index, collection);
+            }
+        }
+    }
+    
+    /**
+     * Internal function used for forEach
+     * @param <K> The type of the keys.
+     * @param <V> The type of the values.
+     * @param collection The collection to iterate over.
+     * @param iteratee The function to call each key/value.
+     */
+    static <K, V> void iForEach(Map<K, V> collection, MapConsumer<K, V> iteratee){
+        for(K key : collection.keySet()){
+            iteratee.accept(collection.get(key), key, collection);
+        }
+    }
+    
+    /**
+     * Calls a function for each member of a collection.
+     * @param <T> The type in the collection.
+     * @param collection The collection to iterate through.
+     * @param iteratee The function to call for each value.
+     */
+    public static <T> void forEach(List<T> collection, ArrayConsumer<T> iteratee){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(iteratee);
+        iForEach(collection, iteratee, true);
+    }
+    
+    /**
+     * Calls a function for each member of a collection.
+     * @param <T> The type in the collection.
+     * @param collection The collection to iterate through.
+     * @param iteratee The function to call for each value.
+     */
+    public static <T> void forEach(List<T> collection, Consumer<T> iteratee){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(iteratee);
+        iForEach(collection, Common.iArrayConsumerFromConsumer(iteratee), true);
+    }
+    
+    /**
+     * Calls a function for each member of a collection.
+     * @param <K> The type the keys are.
+     * @param <V> The type the values are.
+     * @param collection The collection to iterate through.
+     * @param iteratee The function to call for each value.
+     */
+    public static <K, V> void forEach(Map<K, V> collection, MapConsumer<K, V> iteratee){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(iteratee);
+        iForEach(collection, iteratee);
+    }
+    
+    /**
+     * Calls a function for each member of a collection.
+     * @param <K> The type the keys are.
+     * @param <V> The type the values are.
+     * @param collection The collection to iterate through.
+     * @param iteratee The function to call for each value.
+     */
+    public static <K, V> void forEach(Map<K, V> collection, Consumer<V> iteratee){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(iteratee);
+        iForEach(collection, Common.iMapConsumerFromConsumer(iteratee));
+    }
+    
+    /**
+     * Calls a function for each member of a collection, going in reverse.
+     * @param <T> The type in the collection.
+     * @param collection The collection to iterate through.
+     * @param iteratee The function to call for each value.
+     */
+    public static <T> void forEachRight(List<T> collection, ArrayConsumer<T> iteratee){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(iteratee);
+        iForEach(collection, iteratee, false);
+    }
+    
+    /**
+     * Calls a function for each member of a collection, going in reverse.
+     * @param <T> The type in the collection.
+     * @param collection The collection to iterate through.
+     * @param iteratee The function to call for each value.
+     */
+    public static <T> void forEachRight(List<T> collection, Consumer<T> iteratee){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(iteratee);
+        iForEach(collection, Common.iArrayConsumerFromConsumer(iteratee), false);
     }
 }

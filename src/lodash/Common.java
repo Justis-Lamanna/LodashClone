@@ -5,6 +5,7 @@
  */
 package lodash;
 
+import interfaces.ArrayConsumer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -12,7 +13,9 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import interfaces.ArrayPredicate;
+import interfaces.MapConsumer;
 import interfaces.MapPredicate;
+import java.util.function.Consumer;
 
 /**
  *
@@ -113,5 +116,26 @@ public class Common {
      */
     static <K, V> MapPredicate<K, V> iMapPredicateFromPredicate(Predicate<V> predicate){
         return (v, i, c) -> predicate.test(v);
+    }
+    
+    /**
+     * Internal function to turn a Consumer into an ArrayConsumer
+     * @param <T> The type contained in the list.
+     * @param consumer The consumer to wrap.
+     * @return The Consumer as an ArrayConsumer.
+     */
+    static <T> ArrayConsumer<T> iArrayConsumerFromConsumer(Consumer<T> consumer){
+        return (v, i, c) -> consumer.accept(v);
+    }
+    
+    /**
+     * Internal function to turn a Consumer into a MapConsumer
+     * @param <K> The type of the keys.
+     * @param <V> The type of the values.
+     * @param consumer The consumer to wrap.
+     * @return The Consumer as a MapConsumer.
+     */
+    static <K, V> MapConsumer<K, V> iMapConsumerFromConsumer(Consumer<V> consumer){
+        return (v, i, c) -> consumer.accept(v);
     }
 }
