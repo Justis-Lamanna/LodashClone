@@ -7,6 +7,7 @@ package module;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -106,7 +107,16 @@ public class LodashUtil {
      * @param <T> The type checking.
      * @return A predicate that returns true if the tested object is non-null.
      */
-    public static <T> Predicate<T> validObjects(){
+    public static <T> Predicate<T> nonNulls(){
         return t -> t != null;
+    }
+    
+    /**
+     * A predicate that returns true if the supplied object is null.
+     * @param <T> The type checking.
+     * @return A predicate that returns true if the tested object is null.
+     */
+    public static <T> Predicate<T> nulls(){
+        return t -> t == null;
     }
 }

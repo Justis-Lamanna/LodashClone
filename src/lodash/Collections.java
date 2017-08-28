@@ -257,10 +257,10 @@ public class Collections {
      * @param predicate The predicate to determine a match.
      * @return The found key, or null.
      */
-    static <K, V> K iFind(Map<K, V> collection, MapPredicate<K, V> predicate){
+    static <K, V> V iFind(Map<K, V> collection, MapPredicate<K, V> predicate){
         for(K key : collection.keySet()){
             if(predicate.test(collection.get(key), key, collection)){
-                return key;
+                return collection.get(key);
             }
         }
         return null;
@@ -316,7 +316,7 @@ public class Collections {
      * @param predicate The predicate to determine a match.
      * @return The found item, or null if none was found.
      */
-    public static <K, V> K find(Map<K, V> collection, MapPredicate<K, V> predicate){
+    public static <K, V> V find(Map<K, V> collection, MapPredicate<K, V> predicate){
         Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(Objects.requireNonNull(collection));
         return iFind(immutableCollection, Objects.requireNonNull(predicate));
     }
@@ -342,7 +342,7 @@ public class Collections {
      * @param predicate The predicate to determine a match.
      * @return The found item, or null if none was found.
      */
-    public static <K, V> K find(Map<K, V> collection, Predicate<V> predicate){
+    public static <K, V> V find(Map<K, V> collection, Predicate<V> predicate){
         Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(Objects.requireNonNull(collection));
         MapPredicate<K, V> mapPredicate = Common.iMapPredicateFromPredicate(Objects.requireNonNull(predicate));
         return iFind(immutableCollection, mapPredicate);
@@ -445,7 +445,7 @@ public class Collections {
     public static <T> void forEach(List<T> collection, ArrayConsumer<T> iteratee){
         Objects.requireNonNull(collection);
         Objects.requireNonNull(iteratee);
-        iForEach(collection, iteratee, true);
+        iForEach(java.util.Collections.unmodifiableList(collection), iteratee, true);
     }
     
     /**
@@ -457,7 +457,7 @@ public class Collections {
     public static <T> void forEach(List<T> collection, Consumer<T> iteratee){
         Objects.requireNonNull(collection);
         Objects.requireNonNull(iteratee);
-        iForEach(collection, Common.iArrayConsumerFromConsumer(iteratee), true);
+        iForEach(java.util.Collections.unmodifiableList(collection), Common.iArrayConsumerFromConsumer(iteratee), true);
     }
     
     /**
@@ -470,7 +470,7 @@ public class Collections {
     public static <K, V> void forEach(Map<K, V> collection, MapConsumer<K, V> iteratee){
         Objects.requireNonNull(collection);
         Objects.requireNonNull(iteratee);
-        iForEach(collection, iteratee);
+        iForEach(java.util.Collections.unmodifiableMap(collection), iteratee);
     }
     
     /**
@@ -483,7 +483,7 @@ public class Collections {
     public static <K, V> void forEach(Map<K, V> collection, Consumer<V> iteratee){
         Objects.requireNonNull(collection);
         Objects.requireNonNull(iteratee);
-        iForEach(collection, Common.iMapConsumerFromConsumer(iteratee));
+        iForEach(java.util.Collections.unmodifiableMap(collection), Common.iMapConsumerFromConsumer(iteratee));
     }
     
     /**
@@ -495,7 +495,7 @@ public class Collections {
     public static <T> void forEachRight(List<T> collection, ArrayConsumer<T> iteratee){
         Objects.requireNonNull(collection);
         Objects.requireNonNull(iteratee);
-        iForEach(collection, iteratee, false);
+        iForEach(java.util.Collections.unmodifiableList(collection), iteratee, false);
     }
     
     /**
@@ -507,6 +507,179 @@ public class Collections {
     public static <T> void forEachRight(List<T> collection, Consumer<T> iteratee){
         Objects.requireNonNull(collection);
         Objects.requireNonNull(iteratee);
-        iForEach(collection, Common.iArrayConsumerFromConsumer(iteratee), false);
+        iForEach(java.util.Collections.unmodifiableList(collection), Common.iArrayConsumerFromConsumer(iteratee), false);
+    }
+    
+    /**
+     * Internal group by function.
+     * @param <T> The type in the collection.
+     * @param <R> The type to map into.
+     * @param collection The collection to group by.
+     * @param iteratee The mapping function.
+     * @return A grouped mapping.
+     */
+    static <T, R> Map<R, List<T>> iGroupBy(Collection<T> collection, Function<T, R> iteratee){
+        Map<R, List<T>> groupMap = new HashMap<>();
+        for(T value : collection){
+            R mappedValue = iteratee.apply(value);
+            if(groupMap.containsKey(mappedValue)){
+                groupMap.get(mappedValue).add(value);
+            } else {
+                List<T> group = new ArrayList<>();
+                group.add(value);
+                groupMap.put(mappedValue, group);
+            }
+        }
+        return groupMap;
+    }
+    
+    /**
+     * Creates a grouping of a list.
+     * Creates a map composed of keys generated from the results of running each
+     * element of collection through iteratee, and values being the list of values
+     * that mapped to that key.
+     * @param <T> The type contained in the list.
+     * @param <R> The type the values are mapped into.
+     * @param collection The collection to iterate through.
+     * @param iteratee The function to map each value.
+     * @return An object containing mapped values, and the list of values that mapped to them.
+     */
+    public static <T, R> Map<R, List<T>> groupBy(List<T> collection, Function<T, R> iteratee){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(iteratee);
+        return iGroupBy(collection, iteratee);
+    }
+    
+    /**
+     * Creates a grouping of a list.
+     * Creates a map composed of keys generated from the results of running each
+     * element of collection through iteratee, and values being the list of values
+     * that mapped to that key.
+     * @param <K> The type of the keys in the map.
+     * @param <V> The type of the values in the map.
+     * @param <R> The type the values are mapped into.
+     * @param collection The collection to iterate through.
+     * @param iteratee The function to map each value.
+     * @return An object containing mapped values, and the list of values that mapped to them.
+     */
+    public static <K, V, R> Map<R, List<V>> groupBy(Map<K, V> collection, Function<V, R> iteratee){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(iteratee);
+        return iGroupBy(collection.values(), iteratee);
+    }
+    
+    /**
+     * Internal function to test if a value is in a list.
+     * @param <T> The type in the list.
+     * @param collection The collection to search.
+     * @param item The item to search for.
+     * @param start The index to begin searching at.
+     * @return True if the item is contained in the list.
+     */
+    static <T> boolean iIncludes(List<T> collection, T item, int start){
+        for(int index = start; index < collection.size(); index++){
+            if(Objects.equals(item, collection.get(index))){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Internal function to test if a value is in a list.
+     * @param <K> The type of the keys in the collection.
+     * @param <V> The type of the values in the collection.
+     * @param collection The collection to search.
+     * @param item The item to search for.
+     * @param start The index to begin searching at.
+     * @return True if the item is contained in the list.
+     */
+    static <K, V> boolean iIncludes(Map<K, V> collection, V item){
+        for(K key : collection.keySet()){
+            if(Objects.equals(collection.get(key), item)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Internal function to test if a String is contained in a String.
+     * @param collection The string to search.
+     * @param item The substring to search for.
+     * @param start The index to begin searching at.
+     * @return True if the item is contained in the collection.
+     */
+    static boolean iIncludes(String collection, String item, int start){
+        return collection.substring(start).contains(item);
+    }
+    
+    /**
+     * Check if a value is contained in a collection.
+     * @param <T> The type in the collection.
+     * @param collection The collection to search.
+     * @param value The value to search for.
+     * @param start The index to start searching.
+     * @return True if the object was found.
+     */
+    public static <T> boolean includes(List<T> collection, T value, int start){
+        Objects.requireNonNull(collection);
+        if(start < 0 || start >= collection.size()){
+            throw new ArrayIndexOutOfBoundsException("Start not in bounds.");
+        }
+        return iIncludes(collection, value, start);
+    }
+    
+    /**
+     * Check if a substring is contained in a string.
+     * @param string The string to search.
+     * @param substring The string to search for.
+     * @param start The index to begin searching at.
+     * @return True if the substring is contained in the string.
+     */
+    public static boolean includes(String string, String substring, int start){
+        Objects.requireNonNull(string);
+        Objects.requireNonNull(substring);
+        if(start < 0 || start >= string.length()){
+            throw new ArrayIndexOutOfBoundsException("Start not in bounds.");
+        }
+        return iIncludes(string, substring, start);
+    }
+    
+    /**
+     * Check if a value is contained in a collection.
+     * @param <T> The type in the collection.
+     * @param collection The collection to search.
+     * @param value The value to search for.
+     * @return True if the value was found.
+     */
+    public static <T> boolean includes(List<T> collection, T value){
+        Objects.requireNonNull(collection);
+        return iIncludes(collection, value, 0);
+    }
+    
+    /**
+     * Check if a value is a value in the map.
+     * @param <K> The type of the keys in the collection.
+     * @param <V> The type of the values in the collection.
+     * @param collection The collection to search.
+     * @param value The value to search for.
+     * @return True if the value was found.
+     */
+    public static <K, V> boolean includes(Map<K, V> collection, V value){
+        Objects.requireNonNull(collection);
+        return iIncludes(collection, value);
+    }
+    
+    /**
+     * Check if a substring is contained in a string.
+     * @param string The string to search.
+     * @param substring The string to search for.
+     * @return True if the substring is contained in the string.
+     */
+    public static boolean includes(String string, String substring){
+        Objects.requireNonNull(string);
+        Objects.requireNonNull(substring);
+        return iIncludes(string, substring, 0);
     }
 }
