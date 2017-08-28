@@ -6,6 +6,7 @@
 package lodash;
 
 import interfaces.ArrayConsumer;
+import interfaces.ArrayFunction;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import interfaces.ArrayPredicate;
 import interfaces.MapConsumer;
+import interfaces.MapFunction;
 import interfaces.MapPredicate;
 import java.util.function.Consumer;
 
@@ -137,5 +139,28 @@ public class Common {
      */
     static <K, V> MapConsumer<K, V> iMapConsumerFromConsumer(Consumer<V> consumer){
         return (v, i, c) -> consumer.accept(v);
+    }
+    
+    /**
+     * Internal function to turn a Function into an ArrayFunction
+     * @param <T> The type in the list.
+     * @param <R> The type returned by the function.
+     * @param function The function to wrap.
+     * @return The Function as an ArrayFunction
+     */
+    static <T, R> ArrayFunction<T, R> iArrayFunctionFromFunction(Function<T, R> function){
+        return (v, i, c) -> function.apply(v);
+    }
+    
+    /**
+     * Internal function to turn a Function into a MapFunction
+     * @param <K> The type of the keys.
+     * @param <V> The type of the values.
+     * @param <R> The type returned by the function.
+     * @param function The function to wrap.
+     * @return The Function as a MapFunction
+     */
+    static <K, V, R> MapFunction<K, V, R> iMapFunctionFromFunction(Function<V, R> function){
+        return (v, i, c) -> function.apply(v);
     }
 }
