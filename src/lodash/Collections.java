@@ -160,6 +160,28 @@ public class Collections {
     }
     
     /**
+     * Internal function to filter lists and maps.
+     * @param <V> The type the values are.
+     * @param <I> The type the IDs are (index/key)
+     * @param <C> The type the collection is.
+     * @param collection The collection to iterate through.
+     * @param getKeys The function to retrieve keys from the collection.
+     * @param getValue The function to get a value from a key.
+     * @param predicate The predicate to test against.
+     * @return The filtered list.
+     */
+    static<V, I, C> List<V> iFilter(C collection, Function<C, Collection<I>> getKeys, Function<I, V> getValue, CollectionPredicate<V, I, C> predicate){
+        List<V> filter = new ArrayList<>();
+        for(I id : getKeys.apply(collection)){
+            V value = getValue.apply(id);
+            if(predicate.test(value, id, collection)){
+                filter.add(value);
+            }
+        }
+        return filter;
+    }
+    
+    /**
      * Create a list of all values from a collection that pass a predicate.
      * @param <T> The type in the collection.
      * @param collection The collection to filter.
@@ -169,14 +191,8 @@ public class Collections {
     public static <T> List<T> filter(List<T> collection, ArrayPredicate<T> predicate){
         Objects.requireNonNull(collection);
         Objects.requireNonNull(predicate);
-        List<T> filter = new ArrayList<>();
         List<T> immutableCollection = java.util.Collections.unmodifiableList(collection);
-        for(int index = 0; index < collection.size(); index++){
-            if(predicate.test(collection.get(index), index, immutableCollection)){
-                filter.add(collection.get(index));
-            }
-        }
-        return filter;
+        return iFilter(immutableCollection, Common::iGetIdsFromList, collection::get, predicate);
     }
     
     /**
@@ -187,17 +203,11 @@ public class Collections {
      * @param predicate The predicate to test against.
      * @return The list of all elements from collection that passed the predicate.
      */
-    public static <K, V> Map<K, V> filter(Map<K, V> collection, MapPredicate<K, V> predicate){
+    public static <K, V> List<V> filter(Map<K, V> collection, MapPredicate<K, V> predicate){
         Objects.requireNonNull(collection);
         Objects.requireNonNull(predicate);
-        Map<K, V> filter = new HashMap<>();
         Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(collection);
-        for(K key : collection.keySet()){
-            if(predicate.test(collection.get(key), key, immutableCollection)){
-                filter.put(key, collection.get(key));
-            }
-        }
-        return filter;
+        return iFilter(immutableCollection, Map::keySet, collection::get, predicate);
     }
     
     /**
@@ -220,7 +230,7 @@ public class Collections {
      * @param predicate The predicate to test against.
      * @return The list of all elements from collection that passed the predicate.
      */
-    public static <K, V> Map<K, V> filter(Map<K, V> collection, Predicate<V> predicate){
+    public static <K, V> List<V> filter(Map<K, V> collection, Predicate<V> predicate){
         Objects.requireNonNull(predicate);
         return filter(collection, Common.iMapPredicateFromPredicate(predicate));
     }
@@ -807,6 +817,7 @@ public class Collections {
     public static <K, V, R> List<R> map(Map<K, V> collection, Function<V, R> iteratee){
         Objects.requireNonNull(collection);
         Objects.requireNonNull(iteratee);
-        return iMap(collection, Map::keySet, collection::get, Common.iMapFunctionFromFunction(iteratee));
+        MapFunction<K, V, R> func = Common.iMapFunctionFromFunction(iteratee);
+        return iMap(collection, Map::keySet, collection::get, func);
     }
 }
