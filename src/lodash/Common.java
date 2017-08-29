@@ -5,6 +5,7 @@
  */
 package lodash;
 
+import interfaces.ArrayAccumulator;
 import interfaces.ArrayConsumer;
 import interfaces.ArrayFunction;
 import java.util.ArrayList;
@@ -14,9 +15,11 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import interfaces.ArrayPredicate;
+import interfaces.MapAccumulator;
 import interfaces.MapConsumer;
 import interfaces.MapFunction;
 import interfaces.MapPredicate;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
@@ -162,5 +165,28 @@ public class Common {
      */
     static <K, V, R> MapFunction<K, V, R> iMapFunctionFromFunction(Function<V, R> function){
         return (v, i, c) -> function.apply(v);
+    }
+    
+    /**
+     * Internal function to turn a BiFunction into an ArrayAccumulator
+     * @param <T> The type of the list.
+     * @param <R> The type of the reduction.
+     * @param function The function to wrap.
+     * @return The BiFunction as an ArrayAccumulator
+     */
+    static <T, R> ArrayAccumulator<T, R> iArrayAccumulatorFromBiFunction(BiFunction<R, T, R> function){
+        return (r, v, i, c) -> function.apply(r, v);
+    }
+    
+    /**
+     * Internal function to turn a BiFunction into an MapAccumulator
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param <R> The type of the reduction.
+     * @param function The function to wrap.
+     * @return The BiFunction as a MapAccumulator
+     */
+    static <K, V, R> MapAccumulator<K, V, R> iMapAccumulatorFromBiFunction(BiFunction<R, V, R> function){
+        return (r, v, i, c) -> function.apply(r, v);
     }
 }

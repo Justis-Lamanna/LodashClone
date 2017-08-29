@@ -5,6 +5,7 @@
  */
 package lodash;
 
+import interfaces.ArrayAccumulator;
 import interfaces.ArrayConsumer;
 import interfaces.ArrayFunction;
 import java.util.ArrayList;
@@ -16,11 +17,14 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import interfaces.ArrayPredicate;
+import interfaces.CollectionAccumulator;
 import interfaces.CollectionFunction;
 import interfaces.CollectionPredicate;
+import interfaces.MapAccumulator;
 import interfaces.MapConsumer;
 import interfaces.MapFunction;
 import interfaces.MapPredicate;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
@@ -819,5 +823,147 @@ public class Collections {
         Objects.requireNonNull(iteratee);
         MapFunction<K, V, R> func = Common.iMapFunctionFromFunction(iteratee);
         return iMap(collection, Map::keySet, collection::get, func);
+    }
+    
+    /**
+     * Internal function to partition 
+     * @param <V> The type in the collection.
+     * @param values The values to iterate over.
+     * @param predicate The predicate to use.
+     * @return An list of lists, the first list all the true values, the second all the false ones.
+     */
+    static <V> List<List<V>> iPartition(Collection<V> values, Predicate<V> predicate){
+        List<V> trueList = new ArrayList<>();
+        List<V> falseList = new ArrayList<>();
+        for(V value : values){
+            if(predicate.test(value)){
+                trueList.add(value);
+            } else {
+                falseList.add(value);
+            }
+        }
+        return java.util.Arrays.asList(trueList, falseList);
+    }
+    
+    /**
+     * Partitions a list based on a predicate.
+     * The returned list contains two lists, the first being all the values
+     * the predicate returned true for, and the second being all the values
+     * the predicate returned false for.
+     * @param <T> The type in the collection.
+     * @param collection The collection to iterate over.
+     * @param predicate The predicate to use.
+     * @return A list, containing a true list and a false list.
+     */
+    public static <T> List<List<T>> partition(List<T> collection, Predicate<T> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        return iPartition(collection, predicate);
+    }
+    
+    /**
+     * Partitions a list based on a predicate.
+     * The returned list contains two lists, the first being all the values
+     * the predicate returned true for, and the second being all the values
+     * the predicate returned false for.
+     * @param <K> The type the keys are.
+     * @param <V> The type the values are.
+     * @param collection The collection to iterate over.
+     * @param predicate The predicate to use.
+     * @return A list, containing a true list and a false list.
+     */
+    public static <K, V> List<List<V>> partition(Map<K, V> collection, Predicate<V> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        return iPartition(collection.values(), predicate);
+    }
+    
+    /**
+     * Internal function to reduce a collection.
+     * @param <V> The type the values are.
+     * @param <I> The type the ids are.
+     * @param <C> The type the collection is.
+     * @param <R> The type the reduction is.
+     * @param collection The collection to iterate over.
+     * @param getKeys The function to get keys from the collection.
+     * @param getValue The function to get a value from a key.
+     * @param accumulator The accumulator to use.
+     * @return The accumulated value.
+     */
+    static <V, I, C, R> R iReduce(C collection, Function<C, Collection<I>> getKeys, Function<I, V> getValue, CollectionAccumulator<V, I, C, R> accumulator, R initial){
+        R accumulated = initial;
+        for(I id : getKeys.apply(collection)){
+            V value = getValue.apply(id);
+            accumulated = accumulator.reduce(accumulated, value, id, collection);
+        }
+        return accumulated;
+    }
+    
+    /**
+     * Reduce a collection to a single value.
+     * @param <T> The type in the list.
+     * @param <R> The type of the reduction.
+     * @param collection The collection to reduce.
+     * @param accumulator The accumulator to reduce.
+     * @param initial The initial value.
+     * @return The reduced value.
+     */
+    public static <T, R> R reduce(List<T> collection, ArrayAccumulator<T, R> accumulator, R initial){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(accumulator);
+        List<T> immutableCollection = java.util.Collections.unmodifiableList(collection);
+        return iReduce(immutableCollection, Common::iGetIdsFromList, collection::get, accumulator, initial);
+    }
+    
+    /**
+     * Reduce a collection to a single value.
+     * @param <T> The type in the list.
+     * @param <R> The type of the reduction.
+     * @param collection The collection to reduce.
+     * @param accumulator The accumulator to reduce.
+     * @param initial The initial value.
+     * @return The reduced value.
+     */
+    public static <T, R> R reduce(List<T> collection, BiFunction<R, T, R> accumulator, R initial){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(accumulator);
+        List<T> immutableCollection = java.util.Collections.unmodifiableList(collection);
+        ArrayAccumulator<T, R> arrayAccumulator = Common.iArrayAccumulatorFromBiFunction(accumulator);
+        return iReduce(immutableCollection, Common::iGetIdsFromList, collection::get, arrayAccumulator, initial);
+    }
+    
+    /**
+     * Reduce a collection to a single value.
+     * @param <K> The type of the keys.
+     * @param <V> The type of the values.
+     * @param <R> The type of the reduction.
+     * @param collection The collection to reduce.
+     * @param accumulator The accumulator to reduce.
+     * @param initial The initial value.
+     * @return The reduced value.
+     */
+    public static <K, V, R> R reduce(Map<K, V> collection, MapAccumulator<K, V, R> accumulator, R initial){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(accumulator);
+        Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(collection);
+        return iReduce(immutableCollection, Map::keySet, collection::get, accumulator, initial);
+    }
+    
+    /**
+     * Reduce a collection to a single value.
+     * @param <K> The type of the keys.
+     * @param <V> The type of the values.
+     * @param <R> The type of the reduction.
+     * @param collection The collection to reduce.
+     * @param accumulator The accumulator to reduce.
+     * @param initial The initial value.
+     * @return The reduced value.
+     */
+    public static <K, V, R> R reduce(Map<K, V> collection, BiFunction<R, V, R> accumulator, R initial){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(accumulator);
+        Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(collection);
+        MapAccumulator<K, V, R> mapAccumulator = Common.iMapAccumulatorFromBiFunction(accumulator);
+        return iReduce(immutableCollection, Map::keySet, collection::get, mapAccumulator, initial);
     }
 }
