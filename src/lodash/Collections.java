@@ -904,9 +904,9 @@ public class Collections {
      * @param <T> The type in the list.
      * @param <R> The type of the reduction.
      * @param collection The collection to reduce.
-     * @param accumulator The accumulator to reduce.
+     * @param accumulator The accumulator to use.
      * @param initial The initial value.
-     * @return The reduced value.
+     * @return The reduced list.
      */
     public static <T, R> R reduce(List<T> collection, ArrayAccumulator<T, R> accumulator, R initial){
         Objects.requireNonNull(collection);
@@ -920,9 +920,9 @@ public class Collections {
      * @param <T> The type in the list.
      * @param <R> The type of the reduction.
      * @param collection The collection to reduce.
-     * @param accumulator The accumulator to reduce.
+     * @param accumulator The accumulator to use.
      * @param initial The initial value.
-     * @return The reduced value.
+     * @return The reduced list.
      */
     public static <T, R> R reduce(List<T> collection, BiFunction<R, T, R> accumulator, R initial){
         Objects.requireNonNull(collection);
@@ -938,9 +938,9 @@ public class Collections {
      * @param <V> The type of the values.
      * @param <R> The type of the reduction.
      * @param collection The collection to reduce.
-     * @param accumulator The accumulator to reduce.
+     * @param accumulator The accumulator to use.
      * @param initial The initial value.
-     * @return The reduced value.
+     * @return The reduced list.
      */
     public static <K, V, R> R reduce(Map<K, V> collection, MapAccumulator<K, V, R> accumulator, R initial){
         Objects.requireNonNull(collection);
@@ -955,9 +955,9 @@ public class Collections {
      * @param <V> The type of the values.
      * @param <R> The type of the reduction.
      * @param collection The collection to reduce.
-     * @param accumulator The accumulator to reduce.
+     * @param accumulator The accumulator to use.
      * @param initial The initial value.
-     * @return The reduced value.
+     * @return The reduced list.
      */
     public static <K, V, R> R reduce(Map<K, V> collection, BiFunction<R, V, R> accumulator, R initial){
         Objects.requireNonNull(collection);
@@ -965,5 +965,124 @@ public class Collections {
         Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(collection);
         MapAccumulator<K, V, R> mapAccumulator = Common.iMapAccumulatorFromBiFunction(accumulator);
         return iReduce(immutableCollection, Map::keySet, collection::get, mapAccumulator, initial);
+    }
+    
+    /**
+     * Reduce a collection to a single value, starting from the right.
+     * @param <T> The type of the list.
+     * @param <R> The type of the reduction.
+     * @param collection The collection to reduce.
+     * @param accumulator The accumulator to use.
+     * @param initial The initial value of the reduction.
+     * @return The reduced list.
+     */
+    public static <T, R> R reduceRight(List<T> collection, ArrayAccumulator<T, R> accumulator, R initial){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(accumulator);
+        List<T> immutableCollection  = java.util.Collections.unmodifiableList(Arrays.reverse(collection));
+        return iReduce(immutableCollection, Common::iGetIdsFromList, collection::get, accumulator, initial);
+    }
+    
+    /**
+     * Reduce a collection to a single value, starting from the right.
+     * @param <T> The type of the list.
+     * @param <R> The type of the reduction.
+     * @param collection The collection to reduce.
+     * @param accumulator The accumulator to use.
+     * @param initial The initial value of the reduction.
+     * @return The reduced list.
+     */
+    public static <T, R> R reduceRight(List<T> collection, BiFunction<R, T, R> accumulator, R initial){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(accumulator);
+        List<T> immutableCollection = java.util.Collections.unmodifiableList(Arrays.reverse(collection));
+        ArrayAccumulator<T, R> arrayAccumulator = Common.iArrayAccumulatorFromBiFunction(accumulator);
+        return iReduce(immutableCollection, Common::iGetIdsFromList, collection::get, arrayAccumulator, initial);
+    }
+    
+    /**
+     * Internal function for reject.
+     * @param <V> The type of the values.
+     * @param <I> The type of the identifiers.
+     * @param <C> The type of the collection.
+     * @param collection The collection to reject from.
+     * @param getKeys The function to get the keys of a collection.
+     * @param getValue The function to get the value from a key.
+     * @param predicate The predicate to determine rejection.
+     * @return The list of values, with rejections removed.
+     */
+    static <V, I, C> List<V> iReject(C collection, Function<C, Collection<I>> getKeys, Function<I, V> getValue, CollectionPredicate<V, I, C> predicate){
+        List<V> reject = new ArrayList<>();
+        for(I id : getKeys.apply(collection)){
+            V value = getValue.apply(id);
+            if(!predicate.test(value, id, collection)){
+                reject.add(value);
+            }
+        }
+        return reject;
+    }
+    
+    /**
+     * Returns a collection with all values that failed a predicate.
+     * This is the opposite of filter().
+     * @param <T> The type in the collection.
+     * @param collection The collection to reject from.
+     * @param predicate The predicate to determine rejection.
+     * @return A list of values that failed the predicate.
+     */
+    public static <T> List<T> reject(List<T> collection, ArrayPredicate<T> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        List<T> immutableCollection = java.util.Collections.unmodifiableList(collection);
+        return iReject(immutableCollection, Common::iGetIdsFromList, collection::get, predicate);
+    }
+    
+    /**
+     * Returns a collection with all values that failed a predicate.
+     * This is the opposite of filter().
+     * @param <T> The type in the collection.
+     * @param collection The collection to reject from.
+     * @param predicate The predicate to determine rejection.
+     * @return A list of values that failed the predicate.
+     */
+    public static <T> List<T> reject(List<T> collection, Predicate<T> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        List<T> immutableCollection = java.util.Collections.unmodifiableList(collection);
+        ArrayPredicate<T> arrayPredicate = Common.iArrayPredicateFromPredicate(predicate);
+        return iReject(immutableCollection, Common::iGetIdsFromList, collection::get, arrayPredicate);
+    }
+    
+    /**
+     * Returns a collection with all values that failed a predicate.
+     * This is the opposite of filter().
+     * @param <K> The type of the keys.
+     * @param <V> The type of the values.
+     * @param collection The collection to reject from.
+     * @param predicate The predicate to determine rejection.
+     * @return A list of values that failed the predicate.
+     */
+    public static <K, V> List<V> reject(Map<K, V> collection, MapPredicate<K, V> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(collection);
+        return iReject(immutableCollection, Map::keySet, collection::get, predicate);
+    }
+    
+    /**
+     * Returns a collection with all values that failed a predicate.
+     * This is the opposite of filter().
+     * @param <K> The type of the keys.
+     * @param <V> The type of the values.
+     * @param collection The collection to reject from.
+     * @param predicate The predicate to determine rejection.
+     * @return A list of values that failed the predicate.
+     */
+    public static <K, V> List<V> reject(Map<K, V> collection, Predicate<V> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(collection);
+        MapPredicate<K, V> arrayPredicate = Common.iMapPredicateFromPredicate(predicate);
+        return iReject(immutableCollection, Map::keySet, collection::get, arrayPredicate);
     }
 }
