@@ -17,10 +17,9 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import interfaces.ArrayPredicate;
-import interfaces.MapPredicate;
 
 /**
- *
+ * Methods for Lists of values.
  * @author Justis
  */
 public class Arrays {

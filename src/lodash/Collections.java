@@ -29,7 +29,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
- *
+ * Methods for collections (Lists and Objects)
  * @author Justis
  */
 public class Collections {
