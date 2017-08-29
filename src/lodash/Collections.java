@@ -1104,7 +1104,7 @@ public class Collections {
             int randomIndex = rnd.nextInt(collection.size());
             sample.add(collection.get(randomIndex));
         }
-        return collection;
+        return sample;
     }
     
     /**
