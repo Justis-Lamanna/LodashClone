@@ -1160,4 +1160,70 @@ public class Collections {
         }
         return iSample(new ArrayList<>(collection.values()), number);
     }
+    
+    /**
+     * Internal function for shuffling.
+     * @param <T> The type in the collection.
+     * @param collection The collection to shuffle.
+     * @return The shuffled collection.
+     */
+    static <T> List<T> iShuffle(Collection<T> collection){
+        List<T> shuffle = new ArrayList<>(collection);
+        Random rnd = new Random();
+        for(int i = collection.size() - 1; i > 0; i--){
+            int j = rnd.nextInt(i + 1);
+            java.util.Collections.swap(shuffle, i, j);
+        }
+        return shuffle;
+    }
+    
+    /**
+     * Shuffles the collection.
+     * @param <T> The type in the list.
+     * @param collection The collection to shuffle.
+     * @return The shuffled list.
+     */
+    public static <T> List<T> shuffle(List<T> collection){
+        Objects.requireNonNull(collection);
+        return iShuffle(collection);
+    }
+    
+    /**
+     * Shuffles the collection.
+     * @param <K> The type of the keys.
+     * @param <V> The type of the values.
+     * @param collection The collection to shuffle.
+     * @return The shuffled list.
+     */
+    public static <K, V> List<V> shuffle(Map<K, V> collection){
+        Objects.requireNonNull(collection);
+        return iShuffle(collection.values());
+    }
+    
+    /**
+     * Get the size of a collection.
+     * @param collection The collection to get the size of.
+     * @return The size of the collection.
+     */
+    public static int size(List<?> collection){
+        return Objects.requireNonNull(collection).size();
+    }
+    
+    /**
+     * Get the size of a collection.
+     * @param collection The collection to get the size of.
+     * @return The size of the collection.
+     */
+    public static int size(Map<?, ?> collection){
+        return Objects.requireNonNull(collection).size();
+    }
+    
+    /**
+     * Get the size of a string.
+     * @param collection The string to get the size of.
+     * @return The size of the collection.
+     */
+    public static int size(String collection){
+        return Objects.requireNonNull(collection).length();
+    }
 }
