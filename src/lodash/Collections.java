@@ -24,6 +24,7 @@ import interfaces.MapAccumulator;
 import interfaces.MapConsumer;
 import interfaces.MapFunction;
 import interfaces.MapPredicate;
+import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -1084,5 +1085,79 @@ public class Collections {
         Map<K, V> immutableCollection = java.util.Collections.unmodifiableMap(collection);
         MapPredicate<K, V> arrayPredicate = Common.iMapPredicateFromPredicate(predicate);
         return iReject(immutableCollection, Map::keySet, collection::get, arrayPredicate);
+    }
+    
+    /**
+     * Internal function to get a sample of elements.
+     * @param <T> The type in the collection.
+     * @param collection The collection to choose from.
+     * @param number The number of elements to choose.
+     * @return A list of chosen elements.
+     */
+    static <T> List<T> iSample(List<T> collection, int number){
+        List<T> sample = new ArrayList<>();
+        Random rnd = new Random();
+        if(collection.isEmpty()){
+            return java.util.Arrays.asList((T) null);
+        }
+        for(int index = 0; index < number; index++){
+            int randomIndex = rnd.nextInt(collection.size());
+            sample.add(collection.get(randomIndex));
+        }
+        return collection;
+    }
+    
+    /**
+     * Return a random entry in the list.
+     * @param <T> The type in the collection.
+     * @param collection The collection to choose from.
+     * @return A random value in the collection.
+     */
+    public static <T> T sample(List<T> collection){
+        Objects.requireNonNull(collection);
+        return iSample(collection, 1).get(0);
+    }
+    
+    /**
+     * Return a random value in the map.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param collection The collection to choose from.
+     * @return A random value in the collection.
+     */
+    public static <K, V> V sample(Map<K, V> collection){
+        Objects.requireNonNull(collection);
+        return iSample(new ArrayList<>(collection.values()), 1).get(0);
+    }
+    
+    /**
+     * Return some amount of values in the list.
+     * @param <T> The type in the collection.
+     * @param collection The collection to choose from.
+     * @param number The number of random elements to choose.
+     * @return A list of randomly-chosen values.
+     */
+    public static <T> List<T> sampleSize(List<T> collection, int number){
+        Objects.requireNonNull(collection);
+        if(number < 0){
+            throw new IllegalArgumentException("Size must be non-negative");
+        }
+        return iSample(collection, number);
+    }
+    
+    /**
+     * Return some amount of values in the list.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param collection The collection to choose from.
+     * @param number The number of random elements to choose.
+     * @return A list of randomly-chosen values.
+     */
+    public static <K, V> List<V> sampleSize(Map<K, V> collection, int number){
+        Objects.requireNonNull(collection);
+        if(number < 0){
+            throw new IllegalArgumentException("Size must be non-negative");
+        }
+        return iSample(new ArrayList<>(collection.values()), number);
     }
 }
