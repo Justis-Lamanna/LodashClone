@@ -1226,4 +1226,81 @@ public class Collections {
     public static int size(String collection){
         return Objects.requireNonNull(collection).length();
     }
+    
+    /**
+     * Internal function for some.
+     * @param <V> The type of the value.
+     * @param <I> The type of the key.
+     * @param <C> The type of the collection.
+     * @param collection The collection to iterate over.
+     * @param getKeys The function to get keys from a collection.
+     * @param getValue The function to get a value from a key.
+     * @param predicate The predicate to use for testing.
+     * @return True if a value in the collection returns a true predicate.
+     */
+    static <V, I, C> boolean iSome(C collection, Function<C, Collection<I>> getKeys, Function<I, V> getValue, CollectionPredicate<V, I, C> predicate){
+        for(I id : getKeys.apply(collection)){
+            V value = getValue.apply(id);
+            if(predicate.test(value, id, collection)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Check if a predicate passes for at least one value of the collection.
+     * @param <T> The type in the collection.
+     * @param collection The collection to check.
+     * @param predicate The predicate.
+     * @return True if some value passes the predicate, false otherwise.
+     */
+    public static <T> boolean some(List<T> collection, ArrayPredicate<T> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        return iSome(collection, Common::iGetIdsFromList, collection::get, predicate);
+    }
+    
+    /**
+     * Check if a predicate passes for at least one value of the collection.
+     * @param <T> The type in the collection.
+     * @param collection The collection to check.
+     * @param predicate The predicate.
+     * @return True if some value passes the predicate, false otherwise.
+     */
+    public static <T> boolean some(List<T> collection, Predicate<T> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        ArrayPredicate<T> arrayPredicate = Common.iArrayPredicateFromPredicate(predicate);
+        return iSome(collection, Common::iGetIdsFromList, collection::get, arrayPredicate);
+    }
+    
+    /**
+     * Check if a predicate passes for at least one value of the collection.
+     * @param <K> The type of the keys.
+     * @param <V> The type of the values.
+     * @param collection The collection to check.
+     * @param predicate The predicate.
+     * @return True if some value passes the predicate, false otherwise.
+     */
+    public static <K, V> boolean some(Map<K, V> collection, MapPredicate<K, V> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        return iSome(collection, Map::keySet, collection::get, predicate);
+    }
+    
+    /**
+     * Check if a predicate passes for at least one value of the collection.
+     * @param <K> The type of the keys.
+     * @param <V> The type of the values.
+     * @param collection The collection to check.
+     * @param predicate The predicate.
+     * @return True if some value passes the predicate, false otherwise.
+     */
+    public static <K, V> boolean some(Map<K, V> collection, Predicate<V> predicate){
+        Objects.requireNonNull(collection);
+        Objects.requireNonNull(predicate);
+        MapPredicate<K, V> arrayPredicate = Common.iMapPredicateFromPredicate(predicate);
+        return iSome(collection, Map::keySet, collection::get, arrayPredicate);
+    }
 }
