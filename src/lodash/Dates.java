@@ -13,6 +13,10 @@ import java.util.Date;
  */
 public class Dates {
     
+    private Dates(){
+        throw new IllegalStateException("Can't instantiate Dates");
+    }
+    
     /**
      * Get the number of milliseconds since the Unix epoch.
      * @return The number of milliseconds since the Unix epoch.

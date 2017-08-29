@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.function.Function;
 import lodash.Collections;
 import lodash.Dates;
+import lodash.Functions;
 
 /**
  *
@@ -22,9 +23,9 @@ public class LodashClone {
     }
     
     public static void main(String[] args){
-        List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, 6, 7, 8));
-        List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
-        List<List<Integer>> testList3 = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(1, 4));
-        System.out.println(Dates.now());
+        Function<Integer, Integer> function = Functions.before(4, i -> i + 1);
+        for(int index = 0; index < 4; index++){
+            System.out.println(function.apply(index));
+        }
     }
 }
