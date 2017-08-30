@@ -20,19 +20,26 @@ public class DebounceNilFunction implements NilFunction{
     private Timer timer;
     private final long delay;
     private final boolean trailingEdge;
+    private final boolean throttle;
     
     /**
      * Creates a debounce NilFunction from a regular one.
      * @param function The function to wrap.
      * @param delay The number of milliseconds to wait between before invocation.
      * @param trailingEdge True if this should activate on the trailing edge.
+     * @param throttle True if this function should act as a throttle.
      */
-    public DebounceNilFunction(NilFunction function, long delay, boolean trailingEdge){
+    public DebounceNilFunction(NilFunction function, long delay, boolean trailingEdge, boolean throttle){
         this.function = function;
         this.task = null;
         this.timer = new Timer();
         this.delay = delay;
         this.trailingEdge = trailingEdge;
+        this.throttle = throttle;
+    }
+    
+    public DebounceNilFunction(NilFunction function, long delay, boolean trailingEdge){
+        this(function, delay, trailingEdge, false);
     }
     
     @Override
@@ -46,7 +53,7 @@ public class DebounceNilFunction implements NilFunction{
             if(!trailingEdge){
                 function.invoke();
             }
-        } else {
+        } else if(!throttle) {
             task.cancel();
             task = createTask();
             timer.schedule(task, delay);

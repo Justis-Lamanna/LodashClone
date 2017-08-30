@@ -20,6 +20,23 @@ public class DebounceConsumer<T> implements Consumer<T> {
     private Timer timer;
     private final long delay;
     private final boolean trailingEdge;
+    private final boolean throttle;
+    
+    /**
+     * Creates a debounce or throttle consumer from a regular one.
+     * @param function The function to wrap.
+     * @param delay The number of milliseconds to wait between before invocation.
+     * @param trailingEdge True if this should activate on the trailing edge.
+     * @param throttle True if this debounce should act as a throttle.
+     */
+    public DebounceConsumer(Consumer<T> function, long delay, boolean trailingEdge, boolean throttle){
+        this.function = function;
+        this.task = null;
+        this.timer = new Timer();
+        this.delay = delay;
+        this.trailingEdge = trailingEdge;
+        this.throttle = throttle;
+    }
     
     /**
      * Creates a debounce consumer from a regular one.
@@ -28,11 +45,7 @@ public class DebounceConsumer<T> implements Consumer<T> {
      * @param trailingEdge True if this should activate on the trailing edge.
      */
     public DebounceConsumer(Consumer<T> function, long delay, boolean trailingEdge){
-        this.function = function;
-        this.task = null;
-        this.timer = new Timer();
-        this.delay = delay;
-        this.trailingEdge = trailingEdge;
+        this(function, delay, trailingEdge, false);
     }
     
     @Override
@@ -45,7 +58,7 @@ public class DebounceConsumer<T> implements Consumer<T> {
             if(!trailingEdge){
                 function.accept(t);
             }
-        } else {
+        } else if(!throttle) {
             task.cancel();
             task = createTask(t);
             timer.schedule(task, delay);

@@ -5,10 +5,11 @@
  */
 package module;
 
-import functions.MemoizedFunction;
+import functions.DebounceConsumer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -26,10 +27,16 @@ public class LodashClone {
     }
     
     public static void main(String[] args){
-        MemoizedFunction<Integer, Integer> function = Functions.memoize(i -> i * i);
-        for(int index = 0; index < 7; index++){
-            function.apply(index);
+        DebounceConsumer<Integer> function = Functions.throttle((Integer t) -> System.out.println(t), 1000);
+        for(int index = 0; index < 1_00000; index++){
+            for(int index2 = 0; index2 < 1_00000; index2++){
+                function.accept(index);
+            }
         }
-        System.out.println(function.getMemo());
+        long val = System.currentTimeMillis();
+        while(System.currentTimeMillis() - val < 1000){
+            
+        }
+        function.cancel();
     }
 }

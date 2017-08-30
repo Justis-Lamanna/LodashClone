@@ -9,8 +9,6 @@ import functions.MemoizedFunction;
 import functions.DebounceConsumer;
 import functions.DebounceNilFunction;
 import interfaces.NilFunction;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -371,5 +369,131 @@ public class Functions {
      */
     public static <T> Predicate<T> negate(Predicate<T> predicate){
         return predicate.negate();
+    }
+    
+    /**
+     * Creates a function that invokes its wrapped function once.
+     * @param <T> The type of the input of the function.
+     * @param <R> The type of the output of the function.
+     * @param func The function to wrap.
+     * @return A wrapped function.
+     */
+    public static <T, R> Function<T, R> once(Function<T, R> func){
+        return iDelayed(2, Objects.requireNonNull(func), null, true);
+    }
+    
+    /**
+     * Creates a function that invokes its wrapped function once.
+     * @param <T> The type of the output of the function.
+     * @param func The function to wrap.
+     * @return A wrapped function.
+     */
+    public static <T> Supplier<T> once(Supplier<T> func){
+        return iDelayed(2, Objects.requireNonNull(func), null, true);
+    }
+    
+    /**
+     * Creates a function that invokes its wrapped function once.
+     * @param <T> The type of the input of the function.
+     * @param func The function to wrap.
+     * @return A wrapped function.
+     */
+    public static <T> Consumer<T> once(Consumer<T> func){
+        return iDelayed(2, Objects.requireNonNull(func), true);
+    }
+    
+    /**
+     * Creates a function that invokes its wrapped function once.
+     * @param func The function to wrap.
+     * @return A wrapped function.
+     */
+    public static NilFunction once(NilFunction func){
+        return iDelayed(2, Objects.requireNonNull(func), true);
+    }
+    
+    /**
+     * Throttles a function.
+     * This ensures that, in the case of multiple function calls, the function
+     * is called only at once every wait milliseconds.
+     * 
+     * The returned consumer also contains methods for immediate invokation,
+     * as well as canceling. Once a function is canceled, it always executes
+     * immediately.
+     * @param <T> The type the consumer consumes.
+     * @param func The function to wrap.
+     * @param wait The number of milliseconds to wait before triggering.
+     * @param trailingEdge True if the function to activate at the trailing edge,
+     * or false if it should activate on the leading edge.
+     * @return The wrapped function.
+     */
+    public static <T> DebounceConsumer<T> throttle(Consumer<T> func, long wait, boolean trailingEdge){
+        Objects.requireNonNull(func);
+        if(wait < 0){
+            throw new IllegalArgumentException("Wait must be non-negative");
+        }
+        return new DebounceConsumer<>(func, wait, trailingEdge, true);
+    }
+    
+    /**
+     * Throttles a function.
+     * This ensures that, in the case of multiple function calls, the function
+     * is called only at once every wait milliseconds.
+     * 
+     * The returned consumer also contains methods for immediate invokation,
+     * as well as canceling. Once a function is canceled, it always executes
+     * immediately.
+     * @param <T> The type the consumer consumes.
+     * @param func The function to wrap.
+     * @param wait The number of milliseconds to wait before triggering.
+     * @return The wrapped function.
+     */
+    public static <T> DebounceConsumer<T> throttle(Consumer<T> func, long wait){
+        Objects.requireNonNull(func);
+        if(wait < 0){
+            throw new IllegalArgumentException("Wait must be non-negative");
+        }
+        return new DebounceConsumer<>(func, wait, true, true);
+    }
+    
+    /**
+     * Throttles a function.
+     * This ensures that, in the case of multiple function calls, the function
+     * is called only at once every wait milliseconds.
+     * 
+     * The returned consumer also contains methods for immediate invokation,
+     * as well as canceling. Once a function is canceled, it always executes
+     * immediately.
+     * @param func The function to wrap.
+     * @param wait The number of milliseconds to wait before triggering.
+     * @param trailingEdge True if the function to activate at the trailing edge,
+     * or false if it should activate on the leading edge.
+     * @return The wrapped function.
+     */
+    public static DebounceNilFunction throttle(NilFunction func, long wait, boolean trailingEdge){
+        Objects.requireNonNull(func);
+        if(wait < 0){
+            throw new IllegalArgumentException("Wait must be non-negative");
+        }
+        return new DebounceNilFunction(func, wait, trailingEdge, true);
+    }
+    
+    /**
+     * Throttles a function.
+     * This ensures that, in the case of multiple function calls, the function
+     * is called only at once every wait milliseconds.
+     * 
+     * The returned consumer also contains methods for immediate invokation,
+     * as well as canceling. Once a function is canceled, it always executes
+     * immediately.
+     * @param func The function to wrap.
+     * @param wait The number of milliseconds to wait before triggering.
+     * @return The wrapped function.
+     */
+    public static DebounceNilFunction throttles(NilFunction func, long wait){
+        Objects.requireNonNull(func);
+        if(wait < 0){
+            throw new IllegalArgumentException("Wait must be non-negative");
+        }
+        return new DebounceNilFunction(func, wait, true, true);
     }
 }
