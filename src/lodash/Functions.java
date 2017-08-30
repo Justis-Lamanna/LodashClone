@@ -12,6 +12,9 @@ import interfaces.NilFunction;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -209,6 +212,98 @@ public class Functions {
      */
     public static NilFunction before(int n, NilFunction func){
         return iDelayed(n, Objects.requireNonNull(func), true);
+    }
+    
+    /**
+     * Curries a BiFunction.
+     * Rather than needing to invoke the wrapped BiFunction with both values at
+     * once, this allows you to stagger the invokations by applying the first argument,
+     * followed by the second. Thus, func.apply(t, u) becomes curriedFunc.apply(t).apply(u).
+     * @param <T> The type of the first argument.
+     * @param <U> The type of the second argument.
+     * @param <R> The type of the result.
+     * @param func The function to curry.
+     * @return The curried function.
+     */
+    public static <T, U, R> Function<T, Function<U, R>> curry(BiFunction<T, U, R> func){
+        Objects.requireNonNull(func);
+        return (T t) -> (U u) -> func.apply(t, u);
+    }
+    
+    /**
+     * Curries a BiPredicate.
+     * Rather than needing to invoke the wrapped BiPredicate with both values at
+     * once, this allows you to stagger the invokations by applying the first argument,
+     * followed by the second. Thus, func.apply(t, u) becomes curriedFunc.apply(t).apply(u).
+     * @param <T> The type of the first argument.
+     * @param <U> The type of the second argument.
+     * @param func The function to curry.
+     * @return The curried function.
+     */
+    public static <T, U> Function<T, Predicate<U>> curry(BiPredicate<T, U> func){
+        Objects.requireNonNull(func);
+        return (T t) -> (U u) -> func.test(t, u);
+    }
+    
+    /**
+     * Curries a BiConsumer.
+     * Rather than needing to invoke the wrapped BiConsumer with both values at
+     * once, this allows you to stagger the invokations by applying the first argument,
+     * followed by the second. Thus, func.apply(t, u) becomes curriedFunc.apply(t).apply(u).
+     * @param <T> The type of the first argument.
+     * @param <U> The type of the second argument.
+     * @param func The function to curry.
+     * @return The curried function.
+     */
+    public static <T, U> Function<T, Consumer<U>> curry(BiConsumer<T, U> func){
+        Objects.requireNonNull(func);
+        return (T t) -> (U u) -> func.accept(t, u);
+    }
+    
+    /**
+     * Curries a BiFunction backwards.
+     * Rather than needing to invoke the wrapped BiFunction with both values at
+     * once, this allows you to stagger the invokations by applying the second argument,
+     * followed by the first. Thus, func.apply(t, u) becomes curriedFunc.apply(u).apply(t).
+     * @param <T> The type of the first argument.
+     * @param <U> The type of the second argument.
+     * @param <R> The type of the result.
+     * @param func The function to curry.
+     * @return The curried function.
+     */
+    public static <T, U, R> Function<U, Function<T, R>> curryRight(BiFunction<T, U, R> func){
+        Objects.requireNonNull(func);
+        return (U u) -> (T t) -> func.apply(t, u);
+    }
+    
+    /**
+     * Curries a BiPredicate backwards.
+     * Rather than needing to invoke the wrapped BiPredicate with both values at
+     * once, this allows you to stagger the invokations by applying the second argument,
+     * followed by the first. Thus, func.apply(t, u) becomes curriedFunc.apply(u).apply(t).
+     * @param <T> The type of the first argument.
+     * @param <U> The type of the second argument.
+     * @param func The function to curry.
+     * @return The curried function.
+     */
+    public static <T, U> Function<U, Predicate<T>> curryRight(BiPredicate<T, U> func){
+        Objects.requireNonNull(func);
+        return (U u) -> (T t) -> func.test(t, u);
+    }
+    
+    /**
+     * Curries a BiConsumer backwards.
+     * Rather than needing to invoke the wrapped BiConsumer with both values at
+     * once, this allows you to stagger the invokations by applying the second argument,
+     * followed by the first. Thus, func.apply(t, u) becomes curriedFunc.apply(u).apply(t).
+     * @param <T> The type of the first argument.
+     * @param <U> The type of the second argument.
+     * @param func The function to curry.
+     * @return The curried function.
+     */
+    public static <T, U> Function<U, Consumer<T>> curryRight(BiConsumer<T, U> func){
+        Objects.requireNonNull(func);
+        return (U u) -> (T t) -> func.accept(t, u);
     }
     
     /**
