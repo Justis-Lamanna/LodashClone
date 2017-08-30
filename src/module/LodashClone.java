@@ -33,10 +33,6 @@ public class LodashClone {
                 function.accept(index);
             }
         }
-        long val = System.currentTimeMillis();
-        while(System.currentTimeMillis() - val < 1000){
-            
-        }
         function.cancel();
     }
 }
