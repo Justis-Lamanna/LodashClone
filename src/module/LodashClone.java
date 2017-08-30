@@ -8,7 +8,9 @@ package module;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import lodash.Collections;
 import lodash.Dates;
 import lodash.Functions;
@@ -23,9 +25,9 @@ public class LodashClone {
     }
     
     public static void main(String[] args){
-        Function<Integer, Integer> function = Functions.before(4, i -> i + 1);
-        for(int index = 0; index < 4; index++){
-            System.out.println(function.apply(index));
+        Consumer<Integer> function = Functions.debounce((Integer t) -> System.out.println(t), 1000);
+        for(int index = 0; index < 7; index++){
+            function.accept(index);
         }
     }
 }

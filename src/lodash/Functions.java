@@ -5,8 +5,12 @@
  */
 package lodash;
 
+import functions.DebounceConsumer;
+import functions.DebounceNilFunction;
 import interfaces.NilFunction;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -203,5 +207,145 @@ public class Functions {
      */
     public static NilFunction before(int n, NilFunction func){
         return iDelayed(n, Objects.requireNonNull(func), true);
+    }
+    
+    /**
+     * Debounces a function.
+     * This ensures that, in the case of multiple function calls, the function
+     * is called only at the end or beginning of the calls.
+     * 
+     * The returned consumer also contains methods for immediate invokation,
+     * as well as canceling. Once a function is canceled, it always executes
+     * immediately.
+     * @param <T> The type the consumer consumes.
+     * @param func The function to wrap.
+     * @param wait The number of milliseconds to wait before triggering.
+     * @param trailingEdge True if the function to activate at the trailing edge,
+     * or false if it should activate on the leading edge.
+     * @return The wrapped function.
+     */
+    public static <T> DebounceConsumer<T> debounce(Consumer<T> func, long wait, boolean trailingEdge){
+        Objects.requireNonNull(func);
+        if(wait < 0){
+            throw new IllegalArgumentException("Wait must be non-negative");
+        }
+        return new DebounceConsumer<>(func, wait, trailingEdge);
+    }
+    
+    /**
+     * Debounces a function.
+     * This ensures that, in the case of multiple function calls, the function
+     * is called only at the end of the calls.
+     * 
+     * The returned consumer also contains methods for immediate invokation,
+     * as well as canceling. Once a function is canceled, it always executes
+     * immediately.
+     * @param <T> The type the consumer consumes.
+     * @param func The function to wrap.
+     * @param wait The number of milliseconds to wait before triggering.
+     * @return The wrapped function.
+     */
+    public static <T> DebounceConsumer<T> debounce(Consumer<T> func, long wait){
+        Objects.requireNonNull(func);
+        if(wait < 0){
+            throw new IllegalArgumentException("Wait must be non-negative");
+        }
+        return new DebounceConsumer<>(func, wait, true);
+    }
+    
+    /**
+     * Debounces a function.
+     * This ensures that, in the case of multiple function calls, the function
+     * is called only at the end or beginning of the calls.
+     * 
+     * The returned consumer also contains methods for immediate invokation,
+     * as well as canceling. Once a function is canceled, it always executes
+     * immediately.
+     * @param func The function to wrap.
+     * @param wait The number of milliseconds to wait before triggering.
+     * @param trailingEdge True if the function to activate at the trailing edge,
+     * or false if it should activate on the leading edge.
+     * @return The wrapped function.
+     */
+    public static DebounceNilFunction debounce(NilFunction func, long wait, boolean trailingEdge){
+        Objects.requireNonNull(func);
+        if(wait < 0){
+            throw new IllegalArgumentException("Wait must be non-negative");
+        }
+        return new DebounceNilFunction(func, wait, trailingEdge);
+    }
+    
+    /**
+     * Debounces a function.
+     * This ensures that, in the case of multiple function calls, the function
+     * is called only at the end of the calls.
+     * 
+     * The returned consumer also contains methods for immediate invokation,
+     * as well as canceling. Once a function is canceled, it always executes
+     * immediately.
+     * @param func The function to wrap.
+     * @param wait The number of milliseconds to wait before triggering.
+     * @return The wrapped function.
+     */
+    public static DebounceNilFunction debounce(NilFunction func, long wait){
+        Objects.requireNonNull(func);
+        if(wait < 0){
+            throw new IllegalArgumentException("Wait must be non-negative");
+        }
+        return new DebounceNilFunction(func, wait, true);
+    }
+    
+    /**
+     * Internal function for delay
+     * @param task The task to delay.
+     * @param wait The number of milliseconds to delay by.
+     * @return The task reference;
+     */
+    static TimerTask iDelay(TimerTask task, long wait){
+        Timer timer = new Timer();
+        timer.schedule(task, wait);
+        return task;
+    }
+    
+    /**
+     * Delays executing a function for some time.
+     * @param <T> The type the consumer accepts.
+     * @param func The function to execute.
+     * @param wait The number of milliseconds to wait.
+     * @param arg The argument to invoke the consumer with.
+     * @return The TimerTask which executes the function.
+     */
+    public static <T> TimerTask delay(Consumer<T> func, long wait, T arg){
+        Objects.requireNonNull(func);
+        if(wait < 0){
+            throw new IllegalArgumentException("Wait must be non-negative");
+        }
+        TimerTask task = new TimerTask(){
+            @Override
+            public void run() {
+                func.accept(arg);
+            }
+        };
+        return iDelay(task, wait);
+    }
+    
+    /**
+     * Delays executing a function for some time.
+     * @param func The function to execute.
+     * @param wait The number of milliseconds to wait.
+     * @return The TimerTask which executes the function.
+     */
+    public static TimerTask delay(NilFunction func, long wait){
+        Objects.requireNonNull(func);
+        if(wait < 0){
+            throw new IllegalArgumentException("Wait must be non-negative");
+        }
+        TimerTask task = new TimerTask(){
+            @Override
+            public void run() {
+                func.invoke();
+            }
+        };
+        return iDelay(task, wait);
     }
 }
