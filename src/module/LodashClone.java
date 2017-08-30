@@ -5,6 +5,7 @@
  */
 package module;
 
+import functions.MemoizedFunction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,9 +26,10 @@ public class LodashClone {
     }
     
     public static void main(String[] args){
-        Consumer<Integer> function = Functions.debounce((Integer t) -> System.out.println(t), 1000);
+        MemoizedFunction<Integer, Integer> function = Functions.memoize(i -> i * i);
         for(int index = 0; index < 7; index++){
-            function.accept(index);
+            function.apply(index);
         }
+        System.out.println(function.getMemo());
     }
 }

@@ -5,14 +5,18 @@
  */
 package lodash;
 
+import functions.MemoizedFunction;
 import functions.DebounceConsumer;
 import functions.DebounceNilFunction;
 import interfaces.NilFunction;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -296,18 +300,6 @@ public class Functions {
     }
     
     /**
-     * Internal function for delay
-     * @param task The task to delay.
-     * @param wait The number of milliseconds to delay by.
-     * @return The task reference;
-     */
-    static TimerTask iDelay(TimerTask task, long wait){
-        Timer timer = new Timer();
-        timer.schedule(task, wait);
-        return task;
-    }
-    
-    /**
      * Delays executing a function for some time.
      * @param <T> The type the consumer accepts.
      * @param func The function to execute.
@@ -320,13 +312,16 @@ public class Functions {
         if(wait < 0){
             throw new IllegalArgumentException("Wait must be non-negative");
         }
+        Timer timer = new Timer();
         TimerTask task = new TimerTask(){
             @Override
             public void run() {
                 func.accept(arg);
+                timer.cancel();
             }
         };
-        return iDelay(task, wait);
+        timer.schedule(task, wait);
+        return task;
     }
     
     /**
@@ -340,12 +335,41 @@ public class Functions {
         if(wait < 0){
             throw new IllegalArgumentException("Wait must be non-negative");
         }
+        Timer timer = new Timer();
         TimerTask task = new TimerTask(){
             @Override
             public void run() {
                 func.invoke();
+                timer.cancel();
             }
         };
-        return iDelay(task, wait);
+        return task;
+    }
+    
+    /**
+     * Add memoization to a function.
+     * Previous results are saved, and returned upon using the same
+     * argument. The cache is exposed, for direct manipulation, or changing
+     * to another type of map.
+     * @param <T> The type of the input.
+     * @param <R> The type of the output.
+     * @param func The function to wrap.
+     * @return A memoized function.
+     */
+    public static <T, R> MemoizedFunction<T, R> memoize(Function<T, R> func){
+        Objects.requireNonNull(func);
+        return new MemoizedFunction<>(func);
+    }
+    
+    /**
+     * Negate the result of a predicate.
+     * If the wrapped predicate would return true, the returned predicate
+     * will return false, and vice-versa.
+     * @param <T> The type of the input.
+     * @param predicate The predicate to invert.
+     * @return The inverted predicate.
+     */
+    public static <T> Predicate<T> negate(Predicate<T> predicate){
+        return predicate.negate();
     }
 }
