@@ -30,6 +30,6 @@ public class LodashClone {
     public static void main(String[] args){
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
-        System.out.println(Functions.curryRight((Integer t, Integer u) -> t - u).apply(3).apply(4));
+        System.out.println(Functions.flip((Integer t, Integer u) -> t - u).apply(3, 4));
     }
 }

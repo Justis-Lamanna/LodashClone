@@ -8,7 +8,9 @@ package lodash;
 import functions.MemoizedFunction;
 import functions.DebounceConsumer;
 import functions.DebounceNilFunction;
+import functions.MemoizedBiFunction;
 import interfaces.NilFunction;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,9 +21,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import utils.MemoPair;
 
 /**
  * Methods for functions.
+ * Note: Many of these methods can be expanded in the future, to take advantage
+ * of BiConsumer, BiFunction, and BiPredicate.
  * @author Justis
  */
 public class Functions {
@@ -440,6 +445,43 @@ public class Functions {
     }
     
     /**
+     * Flip the arguments of a BiFunction.
+     * @param <T> The type of the formerly first argument.
+     * @param <U> The type of the formerly second argument.
+     * @param <R> The type of the return value.
+     * @param func The function to invert.
+     * @return The function that accepts the flipped argument.
+     */
+    public static <T, U, R> BiFunction<U, T, R> flip(BiFunction<T, U, R> func){
+        Objects.requireNonNull(func);
+        return (U u, T t) -> func.apply(t, u);
+    }
+    
+    /**
+     * Flip the arguments of a BiPredicate.
+     * @param <T> The type of the formerly first argument.
+     * @param <U> The type of the formerly second argument.
+     * @param func The function to invert.
+     * @return The function that accepts the flipped argument.
+     */
+    public static <T, U> BiPredicate<U, T> flip(BiPredicate<T, U> func){
+        Objects.requireNonNull(func);
+        return (U u, T t) -> func.test(t, u);
+    }
+    
+    /**
+     * Flip the arguments of a BiConsumer.
+     * @param <T> The type of the formerly first argument.
+     * @param <U> The type of the formerly second argument.
+     * @param func The function to invert.
+     * @return The function that accepts the flipped argument.
+     */
+    public static <T, U> BiConsumer<U, T> flip(BiConsumer<T, U> func){
+        Objects.requireNonNull(func);
+        return (U u, T t) -> func.accept(t, u);
+    }
+    
+    /**
      * Add memoization to a function.
      * Previous results are saved, and returned upon using the same
      * argument. The cache is exposed, for direct manipulation, or changing
@@ -452,6 +494,41 @@ public class Functions {
     public static <T, R> MemoizedFunction<T, R> memoize(Function<T, R> func){
         Objects.requireNonNull(func);
         return new MemoizedFunction<>(func);
+    }
+    
+    /**
+     * Add memoization to a function.
+     * Previous results are saved, and returned upon using the same
+     * argument. The cache is exposed, for direct manipulation, or changing
+     * to another type of map. The key of the memo is a MemoPair.
+     * @param <T> The type of the first argument.
+     * @param <U> The type of the second argument.
+     * @param <R> The type of the return value.
+     * @param func The function to wrap.
+     * @return The memoized function.
+     */
+    public static <T, U, R> MemoizedBiFunction<T, U, R, MemoPair<T, U>> memoize(BiFunction<T, U, R> func){
+        Objects.requireNonNull(func);
+        return new MemoizedBiFunction<>(func, MemoPair::new);
+    }
+    
+    /**
+     * Add memoization to a function.
+     * Previous results are saved, and returned upon using the same
+     * argument. The cache is exposed, for direct manipulation, or changing
+     * to another type of map. The key of the memo is determined by the resolver
+     * function.
+     * @param <T> The type of the first argument.
+     * @param <U> The type of the second argument.
+     * @param <R> The type of the return value.
+     * @param <K> The type of the key generated.
+     * @param func The function to wrap.
+     * @param resolver The function to turn the parameters into a memo key.
+     * @return The memoized function.
+     */
+    public static <T, U, R, K> MemoizedBiFunction<T, U, R, K> memoize(BiFunction<T, U, R> func, BiFunction<T, U, K> resolver){
+        Objects.requireNonNull(func);
+        return new MemoizedBiFunction<>(func, resolver);
     }
     
     /**
@@ -584,7 +661,7 @@ public class Functions {
      * @param wait The number of milliseconds to wait before triggering.
      * @return The wrapped function.
      */
-    public static DebounceNilFunction throttles(NilFunction func, long wait){
+    public static DebounceNilFunction throttle(NilFunction func, long wait){
         Objects.requireNonNull(func);
         if(wait < 0){
             throw new IllegalArgumentException("Wait must be non-negative");
