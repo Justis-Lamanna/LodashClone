@@ -7,8 +7,11 @@ package lodash;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 /**
@@ -19,45 +22,6 @@ public class Lang {
     
     private Lang(){
         throw new IllegalStateException("Cannot instantiate Lang");
-    }
-    
-    /**
-     * Returns the provided collection as a list.
-     * This is part of the programming of lodash's castArray: Anything that is
-     * a collection returns itself, otherwise it is wrapped in a list. Lists in java
-     * will match this method first: Everything else will go to the other version.
-     * @param <T> The type in the list.
-     * @param list The list to return.
-     * @return The returned list.
-     */
-    public static <T> List<T> castArray(Collection<T> list){
-        //Null matches this version. Lodash returns null wrapped in a list, so we do that here.
-        if(list == null){
-            return java.util.Arrays.asList((T) null);
-        }
-        return new ArrayList<>(list);
-    }
-    
-    /**
-     * Returns the provided value wrapped in a list.
-     * This is part of the programming of lodash's castArray: Anything that is
-     * a list returns itself, otherwise it is wrapped in a list. Lists in java
-     * will match the other method first: Everything else will go to this version.
-     * @param <T> The type in the list.
-     * @param value The value to wrap.
-     * @return The returned list.
-     */
-    public static <T> List<T> castArray(T value){
-        return java.util.Arrays.asList(value);
-    }
-    
-    /**
-     * Returns an empty list.
-     * @param <T> The type expected of the returned list.
-     * @return An empty list.
-     */
-    public static <T> List<T> castArray(){
-        return java.util.Collections.emptyList();
     }
     
     /**
@@ -83,5 +47,121 @@ public class Lang {
             }
         }
         return true;
+    }
+    
+    /**
+     * Tests if two objects are equal.
+     * @param value The first value.
+     * @param other The second value.
+     * @return True if both are equal, false if not.
+     */
+    public static boolean eq(Object value, Object other){
+        return Objects.deepEquals(value, other);
+    }
+    
+    /**
+     * Compare two values.
+     * @param <T> The type of the values.
+     * @param value The first value.
+     * @param other The second value.
+     * @param comparator The comparator.
+     * @param compVal Which branch should be use.
+     * @return 
+     */
+    static <T> boolean iCompare(T value, T other, Comparator<T> comparator, BiPredicate<Integer, Integer> comparison){
+        int compared = Objects.compare(value, other, comparator);
+        return comparison.test(compared, 0);
+    }
+    
+    /**
+     * Checks if a value is greater than another.
+     * @param <T> The type of the operands.
+     * @param value The first value.
+     * @param other The second value.
+     * @return True if value is greater than other.
+     */
+    public static <T extends Comparable> boolean gt(T value, T other){
+        return iCompare(value, other, Comparator.naturalOrder(), (t, u) -> t > u);
+    }
+    
+    /**
+     * Checks if a value is greater than another.
+     * @param <T> The type of the operands.
+     * @param value The first value.
+     * @param other The second value.
+     * @param comparator The comparator to use.
+     * @return True if value is greater than other.
+     */
+    public static <T> boolean gt(T value, T other, Comparator<T> comparator){
+        return iCompare(value, other, comparator, (t, u) -> t > u);
+    }
+    
+    /**
+     * Checks if a value is greater than or equal to another.
+     * @param <T> The type of the operands.
+     * @param value The first value.
+     * @param other The second value.
+     * @return True if value is greater than or equal to other.
+     */
+    public static <T extends Comparable> boolean gte(T value, T other){
+        return iCompare(value, other, Comparator.naturalOrder(), (t, u) -> t >= u);
+    }
+    
+    /**
+     * Checks if a value is greater than or equal to another.
+     * @param <T> The type of the operands.
+     * @param value The first value.
+     * @param other The second value.
+     * @param comparator The comparator to use.
+     * @return True if value is greater than or equal to other.
+     */
+    public static <T> boolean gte(T value, T other, Comparator<T> comparator){
+        return iCompare(value, other, comparator, (t, u) -> t >= u);
+    }
+    
+    /**
+     * Checks if a value is less than another.
+     * @param <T> The type of the operands.
+     * @param value The first value.
+     * @param other The second value.
+     * @return True if value is less than other.
+     */
+    public static <T extends Comparable> boolean lt(T value, T other){
+        return iCompare(value, other, Comparator.naturalOrder(), (t, u) -> t < u);
+    }
+    
+    /**
+     * Checks if a value is less than another.
+     * @param <T> The type of the operands.
+     * @param value The first value.
+     * @param other The second value.
+     * @param comparator The comparator to use.
+     * @return True if value is less than other.
+     */
+    public static <T> boolean lt(T value, T other, Comparator<T> comparator){
+        return iCompare(value, other, comparator, (t, u) -> t < u);
+    }
+    
+    /**
+     * Checks if a value is less than or equal to another.
+     * @param <T> The type of the operands.
+     * @param value The first value.
+     * @param other The second value.
+     * @return True if value is less than or equal to other.
+     */
+    public static <T extends Comparable> boolean lte(T value, T other){
+        return iCompare(value, other, Comparator.naturalOrder(), (t, u) -> t <= u);
+    }
+    
+    /**
+     * Checks if a value is less than or equal to another.
+     * @param <T> The type of the operands.
+     * @param value The first value.
+     * @param other The second value.
+     * @param comparator The comparator to use.
+     * @return True if value is less than or equal to other.
+     */
+    public static <T> boolean lte(T value, T other, Comparator<T> comparator){
+        return iCompare(value, other, comparator, (t, u) -> t <= u);
     }
 }
