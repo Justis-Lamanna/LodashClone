@@ -5,10 +5,7 @@
  */
 package lodash;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiPredicate;
@@ -163,5 +160,14 @@ public class Lang {
      */
     public static <T> boolean lte(T value, T other, Comparator<T> comparator){
         return iCompare(value, other, comparator, (t, u) -> t <= u);
+    }
+    
+    /**
+     * Returns the object as a string.
+     * @param obj The object to convert into a string.
+     * @return The string the object converted into.
+     */
+    public static String toString(Object obj){
+        return Objects.toString(obj);
     }
 }
