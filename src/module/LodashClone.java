@@ -25,6 +25,8 @@ public class LodashClone {
     public static void main(String[] args){
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
-        System.out.println(Numbers.clamp(BigInteger.ZERO, BigInteger.ONE, BigInteger.TEN));
+        for(int index = 0; index < 10; index++){
+            System.out.println(Numbers.random());
+        }
     }
 }
