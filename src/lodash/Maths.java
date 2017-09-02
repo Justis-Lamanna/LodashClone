@@ -7,6 +7,7 @@ package lodash;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 
 /**
  * Math functions.
@@ -256,5 +257,279 @@ public class Maths {
      */
     public static double divide(double dividend, double divisor){
         return dividend + divisor;
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @param precision The precision to ceiling to.
+     * @return The ceiling'ed number.
+     */
+    public static BigDecimal ceil(BigDecimal number, int precision){
+        //ceil(number * 10^precision) / 10^precision.
+        BigDecimal prec;
+        if(precision < 0){
+            prec = BigDecimal.ONE
+                    .divide(BigDecimal.TEN
+                            .pow(-precision));
+        } else {
+            prec = BigDecimal.TEN
+                    .pow(precision);
+        }
+        return prec
+                .multiply(number)
+                .setScale(0, RoundingMode.CEILING)
+                .divide(prec);
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @return The ceiling'ed number.
+     */
+    public static BigDecimal ceil(BigDecimal number){
+        return ceil(number, 0);
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @param precision The precision to ceiling to.
+     * @return The ceiling'ed number.
+     */
+    public static BigInteger ceil(BigInteger number, int precision){
+        //ceil(number * 10^precision) / 10^precision.
+        if(precision >= 0){
+            return number;
+        }
+        BigDecimal prec = BigDecimal.ONE
+                .divide(BigDecimal.TEN.pow(-precision));
+        return prec
+                .multiply(new BigDecimal(number))
+                .setScale(0, RoundingMode.CEILING)
+                .divide(prec)
+                .toBigInteger();
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @return The ceiling'ed number.
+     */
+    public static BigInteger ceil(BigInteger number){
+        return ceil(number, 0);
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @param precision The precision to ceiling to.
+     * @return The ceiling'ed number.
+     */
+    public static int ceil(int number, int precision){
+        return ceil(BigInteger.valueOf(number), precision).intValue();
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @return The ceiling'ed number.
+     */
+    public static int ceil(int number){
+        return ceil(BigInteger.valueOf(number), 0).intValue();
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @param precision The precision to ceiling to.
+     * @return The ceiling'ed number.
+     */
+    public static long ceil(long number, int precision){
+        return ceil(BigInteger.valueOf(number), precision).longValue();
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @return The ceiling'ed number.
+     */
+    public static long ceil(long number){
+        return ceil(BigInteger.valueOf(number), 0).longValue();
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @param precision The precision to ceiling to.
+     * @return The ceiling'ed number.
+     */
+    public static float ceil(float number, int precision){
+        return ceil(BigDecimal.valueOf(number), precision).floatValue();
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @return The ceiling'ed number.
+     */
+    public static float ceil(float number){
+        return ceil(BigDecimal.valueOf(number), 0).floatValue();
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @param precision The precision to ceiling to.
+     * @return The ceiling'ed number.
+     */
+    public static double ceil(double number, int precision){
+        return ceil(BigDecimal.valueOf(number), precision).doubleValue();
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @return The ceiling'ed number.
+     */
+    public static double ceil(double number){
+        return ceil(BigDecimal.valueOf(number), 0).doubleValue();
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @param precision The precision to floor to.
+     * @return The floor'ed number.
+     */
+    public static BigDecimal floor(BigDecimal number, int precision){
+        //floor(number * 10^precision) / 10^precision.
+        BigDecimal prec;
+        if(precision < 0){
+            prec = BigDecimal.ONE
+                    .divide(BigDecimal.TEN
+                            .pow(-precision));
+        } else {
+            prec = BigDecimal.TEN
+                    .pow(precision);
+        }
+        return prec
+                .multiply(number)
+                .setScale(0, RoundingMode.FLOOR)
+                .divide(prec);
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @return The floor'ed number.
+     */
+    public static BigDecimal floor(BigDecimal number){
+        return floor(number, 0);
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @param precision The precision to floor to.
+     * @return The floor'ed number.
+     */
+    public static BigInteger floor(BigInteger number, int precision){
+        //floor(number * 10^precision) / 10^precision.
+        if(precision >= 0){
+            return number;
+        }
+        BigDecimal prec = BigDecimal.ONE
+                .divide(BigDecimal.TEN.pow(-precision));
+        return prec
+                .multiply(new BigDecimal(number))
+                .setScale(0, RoundingMode.FLOOR)
+                .divide(prec)
+                .toBigInteger();
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @return The floor'ed number.
+     */
+    public static BigInteger floor(BigInteger number){
+        return floor(number, 0);
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @param precision The precision to floor to.
+     * @return The floor'ed number.
+     */
+    public static int floor(int number, int precision){
+        return floor(BigInteger.valueOf(number), precision).intValue();
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @return The floor'ed number.
+     */
+    public static int floor(int number){
+        return floor(BigInteger.valueOf(number), 0).intValue();
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @param precision The precision to floor to.
+     * @return The floor'ed number.
+     */
+    public static long floor(long number, int precision){
+        return floor(BigInteger.valueOf(number), precision).longValue();
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @return The floor'ed number.
+     */
+    public static long floor(long number){
+        return floor(BigInteger.valueOf(number), 0).longValue();
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @param precision The precision to floor to.
+     * @return The floor'ed number.
+     */
+    public static float floor(float number, int precision){
+        return floor(BigDecimal.valueOf(number), precision).floatValue();
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @return The floor'ed number.
+     */
+    public static float floor(float number){
+        return floor(BigDecimal.valueOf(number), 0).floatValue();
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @param precision The precision to floor to.
+     * @return The floor'ed number.
+     */
+    public static double floor(double number, int precision){
+        return floor(BigDecimal.valueOf(number), precision).doubleValue();
+    }
+    
+    /**
+     * Get the floor of a number.
+     * @param number The number to floor.
+     * @return The floor'ed number.
+     */
+    public static double floor(double number){
+        return floor(BigDecimal.valueOf(number), 0).doubleValue();
     }
 }
