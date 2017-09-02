@@ -9,9 +9,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import lodash.Maps;
 import lodash.Maths;
 import lodash.Numbers;
+import utils.MapBuilder;
 
 /**
  *
@@ -23,10 +27,13 @@ public class LodashClone {
     }
     
     public static void main(String[] args){
-        List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, 6, 7, 8));
-        List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
-        for(int index = 0; index < 10; index++){
-            System.out.println(Numbers.random());
-        }
+        List<Integer> keys = Arrays.asList(1, 2, 3, 4, 5);
+        List<Integer> values = Arrays.asList(6, 7, 8, 9, 10);
+        Map<Integer, Integer> map = new MapBuilder<Integer, Integer>()
+                .put(keys, values).map();
+        Map<Integer, Integer> map2 = new MapBuilder<Integer, Integer>()
+                    .put(values, keys).map();
+        Maps.assign(map, map2);
+        System.out.println(map);
     }
 }
