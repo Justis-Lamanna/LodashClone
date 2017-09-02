@@ -264,14 +264,14 @@ public class Maths {
     }
     
     /**
-     * Get the ceiling of a number.
+     * Internal function to round a value in some way to some precision
      * @param number The number to ceiling.
      * @param precision The precision to ceiling to.
-     * @return The ceiling'ed number.
+     * @param round The type of rounding to do.
+     * @return The rounded number.
      */
-    public static BigDecimal ceil(BigDecimal number, int precision){
-        //ceil(number * 10^precision) / 10^precision.
-        Objects.requireNonNull(number);
+    static BigDecimal iRound(BigDecimal number, int precision, RoundingMode round){
+        //[ceil/floor/round](number * 10^precision) / 10^precision.
         BigDecimal prec;
         if(precision < 0){
             prec = BigDecimal.ONE
@@ -283,17 +283,40 @@ public class Maths {
         }
         return prec
                 .multiply(number)
-                .setScale(0, RoundingMode.CEILING)
+                .setScale(0, round)
                 .divide(prec);
     }
     
     /**
      * Get the ceiling of a number.
      * @param number The number to ceiling.
+     * @param precision The precision to ceiling to.
+     * @param round The type of rounding to do.
      * @return The ceiling'ed number.
      */
-    public static BigDecimal ceil(BigDecimal number){
-        return ceil(number, 0);
+    public static BigInteger iRound(BigInteger number, int precision, RoundingMode round){
+        //ceil(number * 10^precision) / 10^precision.
+        if(precision >= 0){
+            return number;
+        }
+        BigDecimal prec = BigDecimal.ONE
+                .divide(BigDecimal.TEN.pow(-precision));
+        return prec
+                .multiply(new BigDecimal(number))
+                .setScale(0, round)
+                .divide(prec)
+                .toBigInteger();
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @param precision The precision to ceiling to.
+     * @return The ceiling'ed number.
+     */
+    public static BigDecimal ceil(BigDecimal number, int precision){
+        Objects.requireNonNull(number);
+        return iRound(number, precision, RoundingMode.CEILING);
     }
     
     /**
@@ -305,16 +328,16 @@ public class Maths {
     public static BigInteger ceil(BigInteger number, int precision){
         //ceil(number * 10^precision) / 10^precision.
         Objects.requireNonNull(number);
-        if(precision >= 0){
-            return number;
-        }
-        BigDecimal prec = BigDecimal.ONE
-                .divide(BigDecimal.TEN.pow(-precision));
-        return prec
-                .multiply(new BigDecimal(number))
-                .setScale(0, RoundingMode.CEILING)
-                .divide(prec)
-                .toBigInteger();
+        return iRound(number, precision, RoundingMode.CEILING);
+    }
+    
+    /**
+     * Get the ceiling of a number.
+     * @param number The number to ceiling.
+     * @return The ceiling'ed number.
+     */
+    public static BigDecimal ceil(BigDecimal number){
+        return ceil(number, 0);
     }
     
     /**
@@ -384,19 +407,7 @@ public class Maths {
     public static BigDecimal floor(BigDecimal number, int precision){
         //floor(number * 10^precision) / 10^precision.
         Objects.requireNonNull(number);
-        BigDecimal prec;
-        if(precision < 0){
-            prec = BigDecimal.ONE
-                    .divide(BigDecimal.TEN
-                            .pow(-precision));
-        } else {
-            prec = BigDecimal.TEN
-                    .pow(precision);
-        }
-        return prec
-                .multiply(number)
-                .setScale(0, RoundingMode.FLOOR)
-                .divide(prec);
+        return iRound(number, precision, RoundingMode.FLOOR);
     }
     
     /**
@@ -417,16 +428,7 @@ public class Maths {
     public static BigInteger floor(BigInteger number, int precision){
         //floor(number * 10^precision) / 10^precision.
         Objects.requireNonNull(number);
-        if(precision >= 0){
-            return number;
-        }
-        BigDecimal prec = BigDecimal.ONE
-                .divide(BigDecimal.TEN.pow(-precision));
-        return prec
-                .multiply(new BigDecimal(number))
-                .setScale(0, RoundingMode.FLOOR)
-                .divide(prec)
-                .toBigInteger();
+        return iRound(number, precision, RoundingMode.FLOOR);
     }
     
     /**
@@ -578,13 +580,129 @@ public class Maths {
         if(array.isEmpty()){
             return null;
         }
-        T maximum = array.get(0);
+        T minimum = array.get(0);
         for(int index = 1; index < array.size(); index++){
             if(iteratee.apply(array.get(index)).doubleValue() < 
-                    iteratee.apply(maximum).doubleValue()){
-                maximum = array.get(index);
+                    iteratee.apply(minimum).doubleValue()){
+                minimum = array.get(index);
             }
         }
-        return maximum;
+        return minimum;
+    }
+    
+    /**
+     * Get the round of a number.
+     * @param number The number to round.
+     * @param precision The precision to round to.
+     * @return The round'ed number.
+     */
+    public static BigDecimal round(BigDecimal number, int precision){
+        //round(number * 10^precision) / 10^precision.
+        Objects.requireNonNull(number);
+        return iRound(number, precision, RoundingMode.HALF_UP);
+    }
+    
+    /**
+     * Get the round of a number.
+     * @param number The number to round.
+     * @return The round'ed number.
+     */
+    public static BigDecimal round(BigDecimal number){
+        return round(number, 0);
+    }
+    
+    /**
+     * Get the round of a number.
+     * @param number The number to round.
+     * @param precision The precision to round to.
+     * @return The round'ed number.
+     */
+    public static BigInteger round(BigInteger number, int precision){
+        //round(number * 10^precision) / 10^precision.
+        Objects.requireNonNull(number);
+        return iRound(number, precision, RoundingMode.HALF_UP);
+    }
+    
+    /**
+     * Get the round of a number.
+     * @param number The number to round.
+     * @param precision The precision to round to.
+     * @return The round'ed number.
+     */
+    public static int round(int number, int precision){
+        return round(BigInteger.valueOf(number), precision).intValue();
+    }
+    
+    /**
+     * Get the round of a number.
+     * @param number The number to round.
+     * @param precision The precision to round to.
+     * @return The round'ed number.
+     */
+    public static long round(long number, int precision){
+        return round(BigInteger.valueOf(number), precision).longValue();
+    }
+    
+    /**
+     * Get the round of a number.
+     * @param number The number to round.
+     * @param precision The precision to round to.
+     * @return The round'ed number.
+     */
+    public static float round(float number, int precision){
+        return round(BigDecimal.valueOf(number), precision).floatValue();
+    }
+    
+    /**
+     * Get the round of a number.
+     * @param number The number to round.
+     * @return The round'ed number.
+     */
+    public static float round(float number){
+        return round(BigDecimal.valueOf(number), 0).floatValue();
+    }
+    
+    /**
+     * Get the round of a number.
+     * @param number The number to round.
+     * @param precision The precision to round to.
+     * @return The round'ed number.
+     */
+    public static double round(double number, int precision){
+        return round(BigDecimal.valueOf(number), precision).doubleValue();
+    }
+    
+    /**
+     * Get the round of a number.
+     * @param number The number to round.
+     * @return The round'ed number.
+     */
+    public static double round(double number){
+        return round(BigDecimal.valueOf(number), 0).doubleValue();
+    }
+    
+    /**
+     * Finds the sum of a list.
+     * @param <T> The type of number.
+     * @param array The array to sum.
+     * @return The sum of the list.
+     */
+    public static <T extends Number> double sum(List<T> array){
+        return sumBy(array, i -> i.doubleValue());
+    }
+    
+    /**
+     * Find the sum of a list, using a mapping function to extract the number to sum.
+     * @param <T> The type in the array.
+     * @param array The array to sum.
+     * @param iteratee The mapping function.
+     * @return The sum of the array.
+     */
+    public static <T> double sumBy(List<T> array, Function<T, Number> iteratee){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(iteratee);
+        return array.stream()
+                .map(iteratee)
+                .reduce(0, (s, a) -> s.doubleValue() + a.doubleValue()).doubleValue();
     }
 }

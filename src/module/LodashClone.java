@@ -5,21 +5,13 @@
  */
 package module;
 
-import functions.DebounceConsumer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import lodash.Collections;
-import lodash.Functions;
-import lodash.Lang;
 import lodash.Maths;
+import lodash.Numbers;
 
 /**
  *
@@ -33,6 +25,6 @@ public class LodashClone {
     public static void main(String[] args){
         List<Integer> testList = new ArrayList<>(Arrays.asList(0, 2, 2, 4, 6, 7, 8));
         List<Integer> testList2 = Arrays.asList(4, 4, 4, 9);
-        System.out.println(Maths.min(testList));
+        System.out.println(Numbers.clamp(BigInteger.ZERO, BigInteger.ONE, BigInteger.TEN));
     }
 }
