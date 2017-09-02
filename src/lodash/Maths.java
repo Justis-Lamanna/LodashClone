@@ -8,6 +8,10 @@ package lodash;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Math functions.
@@ -267,6 +271,7 @@ public class Maths {
      */
     public static BigDecimal ceil(BigDecimal number, int precision){
         //ceil(number * 10^precision) / 10^precision.
+        Objects.requireNonNull(number);
         BigDecimal prec;
         if(precision < 0){
             prec = BigDecimal.ONE
@@ -299,6 +304,7 @@ public class Maths {
      */
     public static BigInteger ceil(BigInteger number, int precision){
         //ceil(number * 10^precision) / 10^precision.
+        Objects.requireNonNull(number);
         if(precision >= 0){
             return number;
         }
@@ -314,15 +320,6 @@ public class Maths {
     /**
      * Get the ceiling of a number.
      * @param number The number to ceiling.
-     * @return The ceiling'ed number.
-     */
-    public static BigInteger ceil(BigInteger number){
-        return ceil(number, 0);
-    }
-    
-    /**
-     * Get the ceiling of a number.
-     * @param number The number to ceiling.
      * @param precision The precision to ceiling to.
      * @return The ceiling'ed number.
      */
@@ -333,29 +330,11 @@ public class Maths {
     /**
      * Get the ceiling of a number.
      * @param number The number to ceiling.
-     * @return The ceiling'ed number.
-     */
-    public static int ceil(int number){
-        return ceil(BigInteger.valueOf(number), 0).intValue();
-    }
-    
-    /**
-     * Get the ceiling of a number.
-     * @param number The number to ceiling.
      * @param precision The precision to ceiling to.
      * @return The ceiling'ed number.
      */
     public static long ceil(long number, int precision){
         return ceil(BigInteger.valueOf(number), precision).longValue();
-    }
-    
-    /**
-     * Get the ceiling of a number.
-     * @param number The number to ceiling.
-     * @return The ceiling'ed number.
-     */
-    public static long ceil(long number){
-        return ceil(BigInteger.valueOf(number), 0).longValue();
     }
     
     /**
@@ -404,6 +383,7 @@ public class Maths {
      */
     public static BigDecimal floor(BigDecimal number, int precision){
         //floor(number * 10^precision) / 10^precision.
+        Objects.requireNonNull(number);
         BigDecimal prec;
         if(precision < 0){
             prec = BigDecimal.ONE
@@ -436,6 +416,7 @@ public class Maths {
      */
     public static BigInteger floor(BigInteger number, int precision){
         //floor(number * 10^precision) / 10^precision.
+        Objects.requireNonNull(number);
         if(precision >= 0){
             return number;
         }
@@ -451,15 +432,6 @@ public class Maths {
     /**
      * Get the floor of a number.
      * @param number The number to floor.
-     * @return The floor'ed number.
-     */
-    public static BigInteger floor(BigInteger number){
-        return floor(number, 0);
-    }
-    
-    /**
-     * Get the floor of a number.
-     * @param number The number to floor.
      * @param precision The precision to floor to.
      * @return The floor'ed number.
      */
@@ -470,29 +442,11 @@ public class Maths {
     /**
      * Get the floor of a number.
      * @param number The number to floor.
-     * @return The floor'ed number.
-     */
-    public static int floor(int number){
-        return floor(BigInteger.valueOf(number), 0).intValue();
-    }
-    
-    /**
-     * Get the floor of a number.
-     * @param number The number to floor.
      * @param precision The precision to floor to.
      * @return The floor'ed number.
      */
     public static long floor(long number, int precision){
         return floor(BigInteger.valueOf(number), precision).longValue();
-    }
-    
-    /**
-     * Get the floor of a number.
-     * @param number The number to floor.
-     * @return The floor'ed number.
-     */
-    public static long floor(long number){
-        return floor(BigInteger.valueOf(number), 0).longValue();
     }
     
     /**
@@ -531,5 +485,106 @@ public class Maths {
      */
     public static double floor(double number){
         return floor(BigDecimal.valueOf(number), 0).doubleValue();
+    }
+    
+    /**
+     * Finds the maximum number in a list.
+     * @param <T> The type of number.
+     * @param array The array to search.
+     * @return The max in the list.
+     */
+    public static <T extends Number> T max(List<T> array){
+        return maxBy(array, Common.iIdentity());
+    }
+    
+    /**
+     * Find the maximum number in a list, using a function to determine the sort criteria.
+     * @param <T> The type in the array.
+     * @param <R> The type of number to map to.
+     * @param array The array to search.
+     * @param iteratee The mapping function.
+     * @return The maximum in the array.
+     */
+    public static <T, R extends Number> T maxBy(List<T> array, Function<T, R> iteratee){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(iteratee);
+        if(array.isEmpty()){
+            return null;
+        }
+        T maximum = array.get(0);
+        for(int index = 1; index < array.size(); index++){
+            if(iteratee.apply(array.get(index)).doubleValue() > 
+                    iteratee.apply(maximum).doubleValue()){
+                maximum = array.get(index);
+            }
+        }
+        return maximum;
+    }
+    
+    /**
+     * Find the mean of a list of numbers.
+     * @param <T> The type of number.
+     * @param array The array to average.
+     * @return The average of the list.
+     */
+    public static <T extends Number> double mean(List<T> array){
+        return meanBy(array, Common.iIdentity());
+    }
+    
+    /**
+     * Find the mean of a list of objects, after running them through an iteratee.
+     * NaN is returned if the list is empty.
+     * @param <T> The type in the list.
+     * @param <R> The type of number to map to.
+     * @param array The array to average.
+     * @param iteratee The mapping function.
+     * @return The average of the list.
+     */
+    public static <T, R extends Number> double meanBy(List<T> array, Function<T, R> iteratee){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(iteratee);
+        if(array.isEmpty()){
+            return Double.NaN;
+        }
+        double sum = 0.0;
+        for(T value : array){
+            R mappedValue = iteratee.apply(value);
+            sum += mappedValue.doubleValue();
+        }
+        return sum / array.size();
+    }
+    
+    /**
+     * Finds the maximum number in a list.
+     * @param <T> The type of number.
+     * @param array The array to search.
+     * @return The max in the list.
+     */
+    public static <T extends Number> T min(List<T> array){
+        return minBy(array, Common.iIdentity());
+    }
+    
+    /**
+     * Find the maximum number in a list, using a function to determine the sort criteria.
+     * @param <T> The type in the array.
+     * @param <R> The type of number to map to.
+     * @param array The array to search.
+     * @param iteratee The mapping function.
+     * @return The maximum in the array.
+     */
+    public static <T, R extends Number> T minBy(List<T> array, Function<T, R> iteratee){
+        Objects.requireNonNull(array);
+        Objects.requireNonNull(iteratee);
+        if(array.isEmpty()){
+            return null;
+        }
+        T maximum = array.get(0);
+        for(int index = 1; index < array.size(); index++){
+            if(iteratee.apply(array.get(index)).doubleValue() < 
+                    iteratee.apply(maximum).doubleValue()){
+                maximum = array.get(index);
+            }
+        }
+        return maximum;
     }
 }
