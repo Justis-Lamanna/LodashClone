@@ -6,11 +6,13 @@
 package lodash;
 
 import interfaces.AssignWithFunction;
+import interfaces.MapPredicate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Methods for maps.
@@ -66,7 +68,7 @@ public class Maps {
     static <K, V> void iAssignWith(Map<K, V> map, Map<K, V> source, AssignWithFunction<K, V> customizer){
         for(K key : source.keySet()){
             V customize = customizer.customize(
-                    map.getOrDefault(key, null), 
+                    map.get(key), 
                     source.get(key), 
                     key, 
                     java.util.Collections.unmodifiableMap(map), 
@@ -144,26 +146,6 @@ public class Maps {
     }
     
     /**
-     * Retrieve a list of values from a list of indexes.
-     * @param <T> The type in the list.
-     * @param list The list to pull from.
-     * @param indexes The indexes to pull.
-     * @return The values corresponding to the provided indexes.
-     */
-    public static <T> List<T> at(List<T> list, List<Integer> indexes){
-        Objects.requireNonNull(list);
-        Objects.requireNonNull(indexes);
-        indexes.forEach(i -> Objects.requireNonNull(i));
-        List<T> at = new ArrayList<>();
-        for(int index : indexes){
-            if(index < list.size()) {
-                at.add(list.get(index));
-            }
-        }
-        return at;
-    }
-    
-    /**
      * Assigns any key/value pairs not in object to their defaults.
      * @param <K> The type of the keys.
      * @param <V> The type of the values.
@@ -172,11 +154,81 @@ public class Maps {
      * @return The object, with default values added if needed.
      */
     public static <K, V> Map<K, V> defaults(Map<K, V> object, Map<K, V> defaults){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(defaults);
         for(K key : defaults.keySet()){
             if(!object.containsKey(key)){
                 object.put(key, defaults.get(key));
             }
         }
         return object;
+    }
+    
+    /**
+     * Find a key in a map that matches a predicate.
+     * @param <K> The type of the key.
+     * @param object The object to search.
+     * @param predicate The predicate to determine a match.
+     * @return The found key, or null if none were found.
+     */
+    public static <K> K findKey(Map<K, ?> object, Predicate<K> predicate){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(predicate);
+        for(K key : object.keySet()){
+            if(predicate.test(key)){
+                return key;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Iterates over key/value pairs in an object.
+     * If the iteratee returns false at any point, the iteration will halt.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to iterate over.
+     * @param iteratee The iteratee to use.
+     */
+    public static <K, V> void forIn(Map<K, V> object, MapPredicate<K, V> iteratee){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(iteratee);
+        Map<K, V> immutable = java.util.Collections.unmodifiableMap(object);
+        for(K key : object.keySet()){
+            if(!iteratee.test(object.get(key), key, immutable)){
+                break;
+            }
+        }
+    }
+    
+    /**
+     * Iterates over key/value pairs in an object.
+     * If the iteratee returns false at any point, the iteration will halt.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to iterate over.
+     * @param iteratee The iteratee to use.
+     */
+    public static <K, V> void forIn(Map<K, V> object, Predicate<V> iteratee){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(iteratee);
+        for(K key : object.keySet()){
+            if(!iteratee.test(object.get(key))){
+                break;
+            }
+        }
+    }
+    
+    /**
+     * Get the value at the specified key, or a default if none was found.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to retrieve from.
+     * @param key The key to retrieve.
+     * @param defaultValue The value to return if the object doesn't have the specified key.
+     * @return The value for the specified key, or default if not found.
+     */
+    public static <K, V> V get(Map<K, V> object, K key, V defaultValue){
+        return object.getOrDefault(key, defaultValue);
     }
 }   
