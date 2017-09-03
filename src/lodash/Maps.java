@@ -8,6 +8,7 @@ package lodash;
 import interfaces.AssignWithFunction;
 import interfaces.MapFunction;
 import interfaces.MapPredicate;
+import interfaces.MapTransformAccumulator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,6 +18,7 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 /**
  * Methods for maps.
@@ -505,5 +507,86 @@ public class Maps {
         Objects.requireNonNull(object);
         Objects.requireNonNull(predicate);
         return iOmit(object, (k, v) -> predicate.negate().test(k));
+    }
+    
+    /**
+     * Set the key-value pair in object.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to modify.
+     * @param key The key to set.
+     * @param value The value to set.
+     * @return Object.
+     */
+    public static <K, V> Map<K, V> set(Map<K, V> object, K key, V value){
+        Objects.requireNonNull(object);
+        object.put(key, value);
+        return object;
+    }
+    
+    /**
+     * Transform a map into an object by running key-value pairs through an iteratee.
+     * This differs from reduction in that the MapTransformAccumulator should return
+     * false if iteration should stop at any point. Accumulation is expected to
+     * occur through side effects on the provided accumulator, rather than
+     * potentially returning a new object each time.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param <R> The type of the transformation.
+     * @param object The object to transform.
+     * @param iteratee The transformation function.
+     * @param accumulator The initial value of the transform.
+     * @return The transform.
+     */
+    public static <K, V, R> R transform(Map<K, V> object, MapTransformAccumulator<K, V, R> iteratee, R accumulator){
+        for(K key : object.keySet()){
+            if(!iteratee.reduce(accumulator, object.get(key), key, object)){
+                break;
+            }
+        }
+        return accumulator;
+    }
+    
+    /**
+     * Remove an entry from the map.
+     * @param <K> The type of the key.
+     * @param object The object to remove from.
+     * @param key The key to remove.
+     * @return True if the map was modified, false if not.
+     */
+    public static <K> boolean unset(Map<K, ?> object, K key){
+        Objects.requireNonNull(object);
+        if(object.containsKey(key)){
+            object.remove(key);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Updates the value of the specified key to a new value.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to update.
+     * @param path The key to update.
+     * @param updater The updater to get the new value from the old value.
+     * @return Object.
+     */
+    public static <K, V> Map<K, V> update(Map<K, V> object, K path, UnaryOperator<V> updater){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(updater);
+        object.put(path, updater.apply(object.get(path)));
+        return object;
+    }
+    
+    /**
+     * Get a list of values of a map.
+     * @param <V> The type of the values.
+     * @param object The object to get the values from.
+     * @return The list of values.
+     */
+    public static <V> List<V> values(Map<?, V> object){
+        Objects.requireNonNull(object);
+        return new ArrayList<>(object.values());
     }
 }   
