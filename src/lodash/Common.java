@@ -70,16 +70,6 @@ public class Common {
     }
     
     /**
-     * The identity function.
-     * This function simply returns itself.
-     * @param <T> The input and output types.
-     * @return An identity function.
-     */
-    static <T> Function<T, T> iIdentity(){
-        return t -> t;
-    }
-    
-    /**
      * Creates a BiPredicate from a comparator.
      * @param <T> The type the comparator compares with.
      * @param comparator The comparator to convert.

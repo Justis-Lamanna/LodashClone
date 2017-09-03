@@ -33,7 +33,8 @@ public class LodashClone {
                 .put(keys, values).map();
         Map<Integer, Integer> map2 = new MapBuilder<Integer, Integer>()
                     .put(values, keys).map();
-        Maps.assign(map, map2);
-        System.out.println(map);
+        System.out.println(
+                Maps.mapValues(map, i -> i + 10)
+        );
     }
 }

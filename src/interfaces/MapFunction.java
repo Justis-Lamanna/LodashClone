@@ -16,4 +16,23 @@ import java.util.Map;
  */
 public interface MapFunction<K, V, R> extends CollectionFunction<V, K, Map<K, V>, R>{
     
+    /**
+     * The identity function, which always returns the key.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @return The function which always returns the key.
+     */
+    public static <K, V> MapFunction<K, V, K> keyIdentity(){
+        return (v, i, a) -> i;
+    }
+    
+    /**
+     * The identity function, which always returns the value.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @return The function which always returns the value.
+     */
+    public static <K, V> MapFunction<K, V, V> valueIdentity(){
+        return (v, i, a) -> v;
+    }
 }

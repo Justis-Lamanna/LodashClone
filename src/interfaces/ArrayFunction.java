@@ -15,4 +15,12 @@ import java.util.List;
  */
 public interface ArrayFunction<T, R> extends CollectionFunction<T, Integer, List<T>, R> {
     
+    /**
+     * The identity function, which returns the input value every time.
+     * @param <T> The type of the input and output.
+     * @return The identity ArrayFunction.
+     */
+    public static <T> ArrayFunction<T, T> identity(){
+        return (v, i, a) -> v;
+    }
 }

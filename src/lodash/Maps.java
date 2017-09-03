@@ -6,6 +6,7 @@
 package lodash;
 
 import interfaces.AssignWithFunction;
+import interfaces.MapFunction;
 import interfaces.MapPredicate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -300,5 +301,92 @@ public class Maps {
     public static <K> List<K> keys(Map<K, ?> object){
         Objects.requireNonNull(object);
         return new ArrayList<>(object.keySet());
+    }
+    
+    /**
+     * Internal function to map a map.
+     * @param <K> The type of key in the source object.
+     * @param <L> The type of key in the destination object.
+     * @param <V> The type of value in the source object.
+     * @param <W> The type of value in the destination object.
+     * @param object The object to map.
+     * @param keyMap The mapper to convert source keys to destination keys.
+     * @param valueMap The mapper to convert source values to destination values.
+     * @return The mapped map.
+     */
+    static <K, L, V, W> Map<L, W> iMapMap(Map<K, V> object, MapFunction<K, V, L> keyMap, MapFunction<K, V, W> valueMap){
+        Map<L, W> mapKeys = new HashMap<>();
+        for(K key : object.keySet()){
+            L mappedKey = keyMap.map(object.get(key), key, object);
+            W mappedValue = valueMap.map(object.get(key), key, object);
+            mapKeys.put(mappedKey, mappedValue);
+        }
+        return mapKeys;
+    }
+    
+    /**
+     * Maps a map, using a function to generate new keys from the old keys.
+     * @param <K> The type of the key in the source map.
+     * @param <V> The type of the values.
+     * @param <R> The type of the key in the destination map.
+     * @param object The object to map.
+     * @param iteratee The iterator to map object keys to destination keys.
+     * @return The mapped map.
+     */
+    public static <K, V, R> Map<R, V> mapKeys(Map<K, V> object, MapFunction<K, V, R> iteratee){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(iteratee);
+        Map<K, V> immutableObject = java.util.Collections.unmodifiableMap(object);
+        return iMapMap(immutableObject, iteratee, MapFunction.valueIdentity());
+    }
+    
+    /**
+     * Maps a map, using a function to generate new keys from the old keys.
+     * Unlike other methods, the Function accepted by this recieves the key
+     * to modify, rather than the value as in all other methods like this.
+     * @param <K> The type of the key in the source map.
+     * @param <V> The type of the values.
+     * @param <R> The type of the key in the destination map.
+     * @param object The object to map.
+     * @param iteratee The iterator to map object keys to destination keys.
+     * @return The mapped map.
+     */
+    public static <K, V, R> Map<R, V> mapKeys(Map<K, V> object, Function<K, R> iteratee){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(iteratee);
+        Map<K, V> immutableObject = java.util.Collections.unmodifiableMap(object);
+        return iMapMap(immutableObject, (v, i, a) -> iteratee.apply(i), MapFunction.valueIdentity());
+    }
+    
+    /**
+     * Maps a map, using a function to generate new values from the old values.
+     * @param <K> The type of the keys.
+     * @param <V> The type of the value in the source map.
+     * @param <R> The type of the value in the destination map.
+     * @param object The object to map.
+     * @param iteratee The iterator to map object values to destination values.
+     * @return The mapped map.
+     */
+    public static <K, V, R> Map<K, R> mapValues(Map<K, V> object, MapFunction<K, V, R> iteratee){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(iteratee);
+        Map<K, V> immutableObject = java.util.Collections.unmodifiableMap(object);
+        return iMapMap(immutableObject, MapFunction.keyIdentity(), iteratee);
+    }
+    
+    /**
+     * Maps a map, using a function to generate new values from the old values.
+     * @param <K> The type of the keys.
+     * @param <V> The type of the value in the source map.
+     * @param <R> The type of the value in the destination map.
+     * @param object The object to map.
+     * @param iteratee The iterator to map object values to destination values.
+     * @return The mapped map.
+     */
+    public static <K, V, R> Map<K, R> mapValues(Map<K, V> object, Function<V, R> iteratee){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(iteratee);
+        Map<K, V> immutableObject = java.util.Collections.unmodifiableMap(object);
+        return iMapMap(immutableObject, MapFunction.keyIdentity(), Common.iMapFunctionFromFunction(iteratee));
     }
 }   

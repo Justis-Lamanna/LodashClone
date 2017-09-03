@@ -675,7 +675,7 @@ public class Arrays {
         for(T value : arrays.get(0)){
             boolean seen = true;
             for(int index = 1; index < arrays.size(); index++){
-                if(!iContains(arrays.get(index), value, Common.iIdentity(), comparator)){
+                if(!iContains(arrays.get(index), value, Function.identity(), comparator)){
                     seen = false;
                     break;
                 }
@@ -1456,7 +1456,7 @@ public class Arrays {
     public static <T> List<T> union(List<List<T>> arrays){
         Objects.requireNonNull(arrays);
         arrays.forEach(i -> Objects.requireNonNull(i));
-        return iUnion(arrays, Common.iIdentity(), Objects::equals);
+        return iUnion(arrays, Function.identity(), Objects::equals);
     }
     
     /**
@@ -1485,7 +1485,7 @@ public class Arrays {
         Objects.requireNonNull(arrays);
         arrays.forEach(i -> Objects.requireNonNull(i));
         Objects.requireNonNull(comparator);
-        return iUnion(arrays, Common.iIdentity(), comparator);
+        return iUnion(arrays, Function.identity(), comparator);
     }
     
     /**
@@ -1499,7 +1499,7 @@ public class Arrays {
         Objects.requireNonNull(arrays);
         arrays.forEach(i -> Objects.requireNonNull(i));
         Objects.requireNonNull(comparator);
-        return iUnion(arrays, Common.iIdentity(), Common.iBiPredicateFromComparator(comparator));
+        return iUnion(arrays, Function.identity(), Common.iBiPredicateFromComparator(comparator));
     }
     
     /**
@@ -1510,7 +1510,7 @@ public class Arrays {
      */
     public static <T> List<T> uniq(List<T> array){
         Objects.requireNonNull(array);
-        return iUnion(java.util.Arrays.asList(array), Common.iIdentity(), Objects::equals);
+        return iUnion(java.util.Arrays.asList(array), Function.identity(), Objects::equals);
     }
     
     /**
@@ -1536,7 +1536,7 @@ public class Arrays {
     public static <T> List<T> uniqWith(List<T> array, BiPredicate<T, T> comparator){
         Objects.requireNonNull(array);
         Objects.requireNonNull(comparator);
-        return iUnion(java.util.Arrays.asList(array), Common.iIdentity(), comparator);
+        return iUnion(java.util.Arrays.asList(array), Function.identity(), comparator);
     }
     
     /**
@@ -1549,7 +1549,7 @@ public class Arrays {
     public static <T> List<T> uniqWith(List<T> array, Comparator<T> comparator){
         Objects.requireNonNull(array);
         Objects.requireNonNull(comparator);
-        return iUnion(java.util.Arrays.asList(array), Common.iIdentity(), Common.iBiPredicateFromComparator(comparator));
+        return iUnion(java.util.Arrays.asList(array), Function.identity(), Common.iBiPredicateFromComparator(comparator));
     }
     
     /**
@@ -1585,7 +1585,7 @@ public class Arrays {
                 throw new IllegalArgumentException("All arrays must be the same size");
             }
         }
-        return iUnzip(arrays, Common.iIdentity());
+        return iUnzip(arrays, Function.identity());
     }
     
     /**
@@ -1676,7 +1676,7 @@ public class Arrays {
     public static <T> List<T> xor(List<List<T>> arrays){
         Objects.requireNonNull(arrays);
         arrays.forEach(i -> Objects.requireNonNull(i));
-        return iXor(arrays, Common.iIdentity(), Objects::equals);
+        return iXor(arrays, Function.identity(), Objects::equals);
     }
     
     /**
@@ -1709,7 +1709,7 @@ public class Arrays {
         Objects.requireNonNull(arrays);
         arrays.forEach(i -> Objects.requireNonNull(i));
         Objects.requireNonNull(comparator);
-        return iXor(arrays, Common.iIdentity(), comparator);
+        return iXor(arrays, Function.identity(), comparator);
     }
     
     /**
@@ -1725,7 +1725,7 @@ public class Arrays {
         Objects.requireNonNull(arrays);
         arrays.forEach(i -> Objects.requireNonNull(i));
         Objects.requireNonNull(comparator);
-        return iXor(arrays, Common.iIdentity(), Common.iBiPredicateFromComparator(comparator));
+        return iXor(arrays, Function.identity(), Common.iBiPredicateFromComparator(comparator));
     }
     
     /**
@@ -1744,7 +1744,7 @@ public class Arrays {
                 throw new IllegalArgumentException("All arrays must be the same size");
             }
         }
-        return iUnzip(arrays, Common.iIdentity());
+        return iUnzip(arrays, Function.identity());
     }
     
     /**

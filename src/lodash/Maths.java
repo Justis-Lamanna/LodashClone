@@ -496,7 +496,7 @@ public class Maths {
      * @return The max in the list.
      */
     public static <T extends Number> T max(List<T> array){
-        return maxBy(array, Common.iIdentity());
+        return maxBy(array, Function.identity());
     }
     
     /**
@@ -530,7 +530,7 @@ public class Maths {
      * @return The average of the list.
      */
     public static <T extends Number> double mean(List<T> array){
-        return meanBy(array, Common.iIdentity());
+        return meanBy(array, Function.identity());
     }
     
     /**
@@ -563,7 +563,7 @@ public class Maths {
      * @return The max in the list.
      */
     public static <T extends Number> T min(List<T> array){
-        return minBy(array, Common.iIdentity());
+        return minBy(array, Function.identity());
     }
     
     /**
