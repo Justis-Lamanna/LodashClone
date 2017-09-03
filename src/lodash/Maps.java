@@ -10,9 +10,11 @@ import interfaces.MapFunction;
 import interfaces.MapPredicate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -388,5 +390,120 @@ public class Maps {
         Objects.requireNonNull(iteratee);
         Map<K, V> immutableObject = java.util.Collections.unmodifiableMap(object);
         return iMapMap(immutableObject, MapFunction.keyIdentity(), Common.iMapFunctionFromFunction(iteratee));
+    }
+    
+    /**
+     * Internal function to copy an object, omitting key/values that predicate returns false for.
+     * @param <K> The type of key.
+     * @param <V> The type of value.
+     * @param object The object to omit from.
+     * @param predicate The predicate to determine omission.
+     * @return A copy of the supplied object, with passed key/values removed.
+     */
+    static <K, V> Map<K, V> iOmit(Map<K, V> object, BiPredicate<K, V> predicate){
+        Map<K, V> omitMap = new HashMap<>();
+        for(K key : object.keySet()){
+            if(!predicate.test(key, object.get(key))){
+                omitMap.put(key, object.get(key));
+            }
+        }
+        return omitMap;
+    }
+    
+    /**
+     * Return a copy of the map, with the specified keys omitted.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to omit from.
+     * @param paths The keys to omit.
+     * @return A copy of object, with the specified keys removed.
+     */
+    public static <K, V> Map<K, V> omit(Map<K, V> object, List<K> paths){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(paths);
+        return iOmit(object, (k, v) -> paths.contains(k));
+    }
+    
+    /**
+     * Return a copy of the map, with the specified key omitted.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to omit from.
+     * @param path The key to omit.
+     * @return A copy of object, with the specified key removed.
+     */
+    public static <K, V> Map<K, V> omit(Map<K, V> object, K path){
+        Objects.requireNonNull(object);
+        return iOmit(object, (k, v) -> Objects.equals(k, path));
+    }
+    
+    /**
+     * Return a copy of the map, with key/values passing predicate removed.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to omit from.
+     * @param predicate The predicate to determine if a key is to be kept.
+     * @return A copy of the object, with passing key/values removed.
+     */
+    public static <K, V> Map<K, V> omitBy(Map<K, V> object, BiPredicate<K, V> predicate){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(predicate);
+        return iOmit(object, predicate);
+    }
+    
+    /**
+     * Return a copy of the map, with keys passing predicate removed.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to omit from.
+     * @param predicate The predicate to determine if a key is to be kept.
+     * @return A copy of the object, with passing keys removed.
+     */
+    public static <K, V> Map<K, V> omitBy(Map<K, V> object, Predicate<K> predicate){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(predicate);
+        return iOmit(object, (k, v) -> predicate.test(k));
+    }
+    
+    /**
+     * Return a copy of the map, with the specified keys only.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to pick from.
+     * @param paths The keys to pick.
+     * @return A copy of object, with the specified keys only.
+     */
+    public static <K, V> Map<K, V> pick(Map<K, V> object, List<K> paths){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(paths);
+        return iOmit(object, (k, v) -> !paths.contains(k));
+    }
+    
+    /**
+     * Return a copy of the map, with key/values passing predicate only.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to pick from.
+     * @param predicate The predicate to determine if a key is to be kept.
+     * @return A copy of the object, with passing key/values only.
+     */
+    public static <K, V> Map<K, V> pickBy(Map<K, V> object, BiPredicate<K, V> predicate){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(predicate);
+        return iOmit(object, predicate.negate());
+    }
+    
+    /**
+     * Return a copy of the map, with keys passing predicate only.
+     * @param <K> The type of the key.
+     * @param <V> The type of the value.
+     * @param object The object to pick from.
+     * @param predicate The predicate to determine if a key is to be kept.
+     * @return A copy of the object, with passing keys removed.
+     */
+    public static <K, V> Map<K, V> pickBy(Map<K, V> object, Predicate<K> predicate){
+        Objects.requireNonNull(object);
+        Objects.requireNonNull(predicate);
+        return iOmit(object, (k, v) -> predicate.negate().test(k));
     }
 }   
