@@ -1100,9 +1100,12 @@ public class Collections {
         if(collection.isEmpty()){
             return java.util.Arrays.asList((T) null);
         }
-        for(int index = 0; index < number; index++){
-            int randomIndex = rnd.nextInt(collection.size());
+        List<T> collectionCopy = new ArrayList<>(collection);
+        int sampleSize = Math.min(number, collectionCopy.size());
+        for(int index = 0; index < sampleSize; index++){
+            int randomIndex = rnd.nextInt(collectionCopy.size());
             sample.add(collection.get(randomIndex));
+            collectionCopy.remove(randomIndex);
         }
         return sample;
     }

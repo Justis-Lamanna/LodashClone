@@ -12,9 +12,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import lodash.Maps;
 import lodash.Maths;
 import lodash.Numbers;
+import sequence.ListChain;
 import utils.MapBuilder;
 
 /**
@@ -33,11 +35,19 @@ public class LodashClone {
                 .put(keys, values).map();
         Map<Integer, Integer> map2 = new MapBuilder<Integer, Integer>()
                     .put(values, keys).map();
-        System.out.println(
-                Maps.values(map)
-        );
-        System.out.println(
-                Maps.keys(map)
-        );
+        //[1, [2, [3, [4]], 5]]
+        List<Object> mapmap = Arrays.asList(
+                1, 
+                Arrays.asList(2, 
+                        Arrays.asList(null, 
+                                Arrays.asList(4)), 5));
+        //System.out.println(mapmap);
+        List<String> list =
+                new ListChain<>(keys)
+                .reverse()
+                .filter(i -> i % 2 != 0)
+                .map(i -> "'" + i + "'")
+                .value();
+        System.out.println(list);
     }
 }

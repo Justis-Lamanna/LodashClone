@@ -503,6 +503,66 @@ public class Arrays {
     }
     
     /**
+     * Internal function to flatten an array.
+     * Doesn't use recursion like the lodash version cuz that's
+     * dumb.
+     * @param array The array to flatten.
+     * @param levels The number of levels deep to flatten.
+     * @return The flattened list.
+     */
+    static List<Object> iFlatten(List<Object> array, int levels){
+        for(int level = levels; level != 0; level--){
+            List<Object> flat = new ArrayList<>();
+            boolean foundList = false;
+            for(Object obj : array){
+                if(obj instanceof List){
+                    flat.addAll((List)obj);
+                    foundList = true;
+                } else {
+                    flat.add(obj);
+                }
+            }
+            if(!foundList){
+                return flat;
+            }
+            array = flat;
+        }
+        return array;
+    }
+    
+    /**
+     * Flatten an array by one level.
+     * @param array The array to flatten.
+     * @return The flattened array.
+     */
+    public static List<Object> flatten(List<Object> array){
+        Objects.requireNonNull(array);
+        return iFlatten(array, 1);
+    }
+    
+    /**
+     * Flattens an array as deeply as possible.
+     * @param array The array to flatten.
+     * @return The flattened array.
+     */
+    public static List<Object> flattenDeep(List<Object> array){
+        Objects.requireNonNull(array);
+        return iFlatten(array, -1);
+    }
+    
+    /**
+     * Flattens an array up to depth times.
+     * A negative value flattens until no more arrays to flatten.
+     * @param array The array to flatten.
+     * @param depth The depth to flatten to.
+     * @return The flattened array.
+     */
+    public static List<Object> flattenDepth(List<Object> array, int depth){
+        Objects.requireNonNull(array);
+        return iFlatten(array, depth);
+    }
+    
+    /**
      * Get the first element of an array.
      * @param <T> The type in the list.
      * @param array The array to retrieve from, or null if the list is empty.
@@ -565,16 +625,6 @@ public class Arrays {
         return Objects.requireNonNull(array).isEmpty() ? 
                 new ArrayList<>() : 
                 array.subList(0, array.size() - 1);
-    }
-    
-    static <T> List<T> iFlatten(List<List<T>> arrays){
-        Objects.requireNonNull(arrays);
-        arrays.forEach(i -> Objects.requireNonNull(i));
-        List<T> flattened = new ArrayList<>();
-        for(List<T> array : arrays){
-            flattened.addAll(array);
-        }
-        return flattened;
     }
     
     /**
@@ -873,15 +923,15 @@ public class Arrays {
      * @return The modified array.
      * @throws NullPointerException Array, values, or comparator is null.
      */
-    public static <T> List<T> pullAllWith(List<T> array, List<T> values, BiPredicate<T, T> comparator){
+    public static <T, R> List<T> pullAllWith(List<T> array, List<R> values, BiPredicate<T, R> comparator){
         Objects.requireNonNull(array);
         Objects.requireNonNull(values);
         Objects.requireNonNull(comparator);
         Iterator<T> iterator = array.iterator();
         while(iterator.hasNext()){
             T value = iterator.next();
-            for(T other : values){
-                if(comparator.test(other, value)){
+            for(R other : values){
+                if(comparator.test(value, other)){
                     iterator.remove();
                     break;
                 }
