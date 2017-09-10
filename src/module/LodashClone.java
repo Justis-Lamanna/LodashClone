@@ -16,6 +16,7 @@ import java.util.function.Predicate;
 import lodash.Maps;
 import lodash.Maths;
 import lodash.Numbers;
+import lodash.Strings;
 import sequence.ListChain;
 import utils.MapBuilder;
 
@@ -29,7 +30,7 @@ public class LodashClone {
     }
     
     public static void main(String[] args){
-        List<Integer> keys = Arrays.asList(1, 2, 3, 4, 5);
+        /*List<Integer> keys = Arrays.asList(1, 2, 3, 4, 5);
         List<Integer> values = Arrays.asList(6, 7, 8, 9, 10);
         Map<Integer, Integer> map = new MapBuilder<Integer, Integer>()
                 .put(keys, values).map();
@@ -40,14 +41,8 @@ public class LodashClone {
                 1, 
                 Arrays.asList(2, 
                         Arrays.asList(null, 
-                                Arrays.asList(4)), 5));
-        //System.out.println(mapmap);
-        List<String> list =
-                new ListChain<>(keys)
-                .reverse()
-                .filter(i -> i % 2 != 0)
-                .map(i -> "'" + i + "'")
-                .value();
-        System.out.println(list);
+                                Arrays.asList(4)), 5));*/
+        System.out.println(Strings.upperCase("__foo_bar__"));
+        
     }
 }

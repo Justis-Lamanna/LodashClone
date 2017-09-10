@@ -14,6 +14,10 @@ import sequence.ListChain;
  */
 public class Seq {
     
+    private Seq(){
+        throw new IllegalStateException("Cannot instantiate Seq");
+    }
+    
     /**
      * Wraps a list so it can be modified with chainable methods.
      * @param <T> The type contained in the list.
