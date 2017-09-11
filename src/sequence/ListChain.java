@@ -46,6 +46,23 @@ public class ListChain<T> {
     }
     
     /**
+     * Retrieve the value in the chain, as an array.
+     * @param array The template array.
+     * @return The current list as an array.
+     */
+    public T[] valueAsArray(T[] array){
+        return list.toArray(array);
+    }
+    
+    /**
+     * Retrieve the value in the chain, as an array.
+     * @return The current list as an array.
+     */
+    public Object[] valueAsArray(){
+        return list.toArray();
+    }
+    
+    /**
      * Concatenates the contained list with the provided list.
      * @param toConcat The list to concatenate with the internal list.
      * @return The ListChain to continue chaining.
