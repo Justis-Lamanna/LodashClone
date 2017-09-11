@@ -12,13 +12,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import lodash.Maps;
 import lodash.Maths;
 import lodash.Numbers;
 import lodash.Strings;
+import lodash.Utils;
 import sequence.ListChain;
 import utils.MapBuilder;
+import utils.Pair;
 
 /**
  *
@@ -42,7 +46,10 @@ public class LodashClone {
                 Arrays.asList(2, 
                         Arrays.asList(null, 
                                 Arrays.asList(4)), 5));*/
-        System.out.println(Strings.upperCase("__foo_bar__"));
+        Function<Integer, String> function = Utils.cond(Arrays.asList(
+                Pair.of(Utils.matches(5), Utils.constant("Hello!"))
+        ));
+        System.out.println(Utils.rangeRight(0));
         
     }
 }

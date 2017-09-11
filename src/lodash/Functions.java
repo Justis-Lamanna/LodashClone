@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import utils.MemoPair;
+import utils.Pair;
 
 /**
  * Methods for functions.
@@ -506,9 +506,9 @@ public class Functions {
      * @param func The function to wrap.
      * @return The memoized function.
      */
-    public static <T, U, R> MemoizedBiFunction<T, U, R, MemoPair<T, U>> memoize(BiFunction<T, U, R> func){
+    public static <T, U, R> MemoizedBiFunction<T, U, R, Pair<T, U>> memoize(BiFunction<T, U, R> func){
         Objects.requireNonNull(func);
-        return new MemoizedBiFunction<>(func, MemoPair::new);
+        return new MemoizedBiFunction<>(func, Pair::of);
     }
     
     /**

@@ -11,7 +11,7 @@ import java.util.Objects;
  * An immutable pair.
  * @author Justis
  */
-public class MemoPair<T, U>{
+public class Pair<T, U>{
     private final T first;
     private final U second;
     
@@ -20,16 +20,28 @@ public class MemoPair<T, U>{
      * @param first The first in the pair.
      * @param second The second in the pair.
      */
-    public MemoPair(T first, U second){
+    private Pair(T first, U second){
         this.first = first;
         this.second = second;
+    }
+    
+    /**
+     * Creates a pair.
+     * @param <T> The type of the first in the pair.
+     * @param <U> The type of the second in the pair.
+     * @param first The first in the pair.
+     * @param second The second in the pair.
+     * @return The created pair.
+     */
+    public static <T, U> Pair of(T first, U second){
+        return new Pair(first, second);
     }
     
     /**
      * Get the first in the pair.
      * @return The first of the pair.
      */
-    public T getFirst(){
+    public T first(){
         return first;
     }
     
@@ -37,14 +49,14 @@ public class MemoPair<T, U>{
      * Get the second in the pair.
      * @return The second of the pair.
      */
-    public U getSecond(){
+    public U last(){
         return second;
     }
 
     @Override
     public boolean equals(Object obj){
-        if(obj instanceof MemoPair){
-            MemoPair pair = (MemoPair)obj;
+        if(obj instanceof Pair){
+            Pair pair = (Pair)obj;
             return Objects.equals(first, pair.first) && 
                     Objects.equals(second, pair.second);
         }
