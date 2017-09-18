@@ -662,7 +662,7 @@ public class ListChain<T> {
      * the function, rather than modifying the source list directly.
      * @param <R> The type contained in the new list.
      * @param function The function to convert the source list into a new list.
-     * @return The ListChain to continue chaining.
+     * @return The ListChain wrapping the results of applying function with the source list.
      */
     public <R> ListChain<R> thru(Function<List<T>, List<R>> function){
         return new ListChain<>(function.apply(list));

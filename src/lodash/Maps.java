@@ -110,7 +110,7 @@ public class Maps {
     }
     
     /**
-     * Add they keys and values of a list of maps to an initial map, after using a customizer.
+     * Add the keys and values of a map to an initial map, after using a customizer.
      * The customizer receives five parameters:
      * - The value at the current key in the map, or null if none.
      * - The value at the current key in the current source.
